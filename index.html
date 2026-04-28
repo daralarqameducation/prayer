@@ -290,10 +290,34 @@
     background: rgba(200,164,110,0.25);
     transition: background 0.3s;
   }
-  .ev-footer-spacer {
+  .ev-footer {
     flex-shrink: 0;
     border-top: 1px solid var(--border);
     height: var(--footer-h, 56px);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+  }
+  .ev-ticker-wrap {
+    width: 100%;
+    overflow: hidden;
+  }
+  .ev-ticker {
+    display: flex;
+    white-space: nowrap;
+    animation: ticker 12s linear infinite;
+    font-size: clamp(0.75rem, 1.3vh, 1rem);
+    color: var(--text2);
+  }
+  .ev-ticker span {
+    display: inline-block;
+    padding-right: 60px;
+    flex-shrink: 0;
+  }
+  @keyframes ticker {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(calc(-1 * var(--ticker-w, 50%))); }
   }
   .ev-list {
     display: flex;
@@ -602,7 +626,7 @@
     color: var(--text3);
   }
   .mb-silent {
-    font-size: clamp(1rem, 2vh, 1.6rem);
+    font-size: clamp(0.7rem, 1.2vh, 1rem);
     font-weight: 500;
     color: var(--text3);
     text-align: left;
@@ -862,7 +886,13 @@
     <div class="ev-list" id="ev-list">
       <!-- Pages injected by JS -->
     </div>
-    <div class="ev-footer-spacer"></div>
+    <div class="ev-footer">
+      <div class="ev-ticker-wrap">
+        <div class="ev-ticker">
+          <span>Pre-recorded online courses available — visit <strong>online.daralarqam.co.uk</strong></span><span>Pre-recorded online courses available — visit <strong>online.daralarqam.co.uk</strong></span>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div id="prayer-panel">
@@ -897,7 +927,7 @@
       <div class="mb-prayer" id="mb-prayer">—</div>
     </div>
     <div class="mb-center">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.6;flex-shrink:0">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.6;flex-shrink:0">
         <rect x="7" y="2" width="10" height="20" rx="2" stroke="currentColor" stroke-width="1.5"/>
         <path d="M10.5 5.5h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
         <circle cx="12" cy="18" r="1" fill="currentColor"/>
@@ -1254,6 +1284,18 @@ function startActiveTracking(tod, tom) {
       bo.classList.remove('active');
     }
   }
+  // Seamless ticker
+  (function() {
+    const ticker = document.querySelector('.ev-ticker');
+    if (!ticker) return;
+    const spans = ticker.querySelectorAll('span');
+    if (!spans.length) return;
+    requestAnimationFrame(() => {
+      const w = spans[0].offsetWidth;
+      ticker.style.setProperty('--ticker-w', w + 'px');
+    });
+  })();
+
   checkBlackout();
   setInterval(checkBlackout, 1000);
 }

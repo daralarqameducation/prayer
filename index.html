@@ -491,18 +491,18 @@
 
   /* ── MOBILE ── */
   @media (max-width: 768px) {
-    html { height: 100%; overflow: hidden; }
-    body { background: var(--bg2); overflow: hidden; height: 100%; }
+    html { height: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    body { background: var(--bg2); overflow-y: auto; height: 100%; }
 
     #app {
       display: flex !important;
       flex-direction: column !important;
       align-items: stretch !important;
       justify-content: flex-start !important;
-      height: 100vh !important;
-      min-height: unset !important;
+      height: auto !important;
+      min-height: 100vh !important;
       padding: 6px !important;
-      overflow: hidden !important;
+      overflow: visible !important;
       gap: 0 !important;
     }
 
@@ -611,13 +611,13 @@
     .prayer-row {
       display: grid;
       grid-template-columns: 1.5fr 1fr 1fr 1fr;
-      padding: 0 14px;
+      padding: 10px 14px;
       border-bottom: 1px solid var(--border);
       align-items: center;
-      flex: 1 !important;
+      flex: none !important;
       min-height: 0;
     }
-    #rows { display: flex; flex-direction: column; flex: 1 !important; min-height: 0; }
+    #rows { display: flex; flex-direction: column; flex: none !important; }
     .p-name { font-size: 1rem !important; font-weight: 700; color: var(--text); text-align: left; }
     .p-name-ar { display: none; }
     .p-begins { font-size: 0.85rem !important; font-weight: 400; color: var(--muted); text-align: center; padding: 0; }
@@ -629,13 +629,11 @@
     .p-cell.p-jamaah-wrap .iqamah-label { display: none !important; }
     .p-tomorrow { font-size: 0.8rem !important; font-weight: 400; color: var(--muted); text-align: center; padding: 0; }
 
-    #app { display: flex; flex-direction: column; height: 100vh !important; overflow: hidden !important; }
+    #app { display: flex; flex-direction: column; }
     .main {
       order: 1;
       border-radius: 18px 18px 0 0;
-      flex: 1;
-      min-height: 0;
-      overflow: hidden;
+      flex: none;
     }
     .footer-row {
       order: 2;

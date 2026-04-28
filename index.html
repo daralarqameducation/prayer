@@ -264,7 +264,6 @@
     border: 1px solid rgba(200,164,110,0.35);
     border-radius: 12px;
     overflow: hidden;
-    padding-top: clamp(10px,1vw,16px);
   }
   .ev-header {
     padding: clamp(6px,1vh,14px) 24px;
@@ -278,8 +277,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-  }
-  .ev-dots {
+  }  .ev-dots {
     display: flex;
     gap: 5px;
     align-items: center;
@@ -306,9 +304,12 @@
   .ev-ticker {
     display: flex;
     white-space: nowrap;
-    animation: ticker 20s linear infinite;
+    animation: ticker 50s linear infinite;
     font-size: clamp(0.75rem, 1.3vh, 1rem);
     color: var(--text2);
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
   .ev-ticker span {
     display: inline-block;
@@ -626,7 +627,7 @@
     color: var(--text3);
   }
   .mb-silent {
-    font-size: clamp(0.7rem, 1.2vh, 1rem);
+    font-size: clamp(0.85rem, 1.5vh, 1.2rem);
     font-weight: 500;
     color: var(--text3);
     text-align: left;
@@ -889,7 +890,7 @@
     <div class="ev-footer">
       <div class="ev-ticker-wrap">
         <div class="ev-ticker">
-          <span>Pre-recorded online courses available — visit <strong>online.daralarqam.co.uk</strong>&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;Support our mission — donate at <strong>daralarqam.co.uk/donate</strong>&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;</span><span>Pre-recorded online courses available — visit <strong>online.daralarqam.co.uk</strong>&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;Support our mission — donate at <strong>daralarqam.co.uk/donate</strong>&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;</span>
+          <span>1. Astaghfirullah (×3) — I seek forgiveness from Allah&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;2. Allahumma Antas-Salam wa minkas-salam, tabarakta ya Dhal-Jalali wal-Ikram — O Allah, You are Peace and from You comes peace. Blessed are You, full of Majesty and Honour&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;3. Recite Ayat-ul-Kursi (Surah Al-Baqarah 2:255) — Protects the believer until the next prayer&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;4. Tasbih Fatimah: SubhanAllah ×33 · Alhamdulillah ×33 · Allahu Akbar ×34&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;</span><span>1. Astaghfirullah (×3) — I seek forgiveness from Allah&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;2. Allahumma Antas-Salam wa minkas-salam, tabarakta ya Dhal-Jalali wal-Ikram — O Allah, You are Peace and from You comes peace. Blessed are You, full of Majesty and Honour&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;3. Recite Ayat-ul-Kursi (Surah Al-Baqarah 2:255) — Protects the believer until the next prayer&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;4. Tasbih Fatimah: SubhanAllah ×33 · Alhamdulillah ×33 · Allahu Akbar ×34&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;</span>
         </div>
       </div>
     </div>
@@ -927,7 +928,7 @@
       <div class="mb-prayer" id="mb-prayer">—</div>
     </div>
     <div class="mb-center">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.6;flex-shrink:0">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.6;flex-shrink:0">
         <rect x="7" y="2" width="10" height="20" rx="2" stroke="currentColor" stroke-width="1.5"/>
         <path d="M10.5 5.5h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
         <circle cx="12" cy="18" r="1" fill="currentColor"/>
@@ -1260,22 +1261,49 @@ function startActiveTracking(tod, tom) {
   tickMobile();
   setInterval(tickMobile, 1000);
 
+  const DUA_CONTENT = [
+    'Astaghfirullah (×3) — I seek forgiveness from Allah',
+    'Allahumma Antas-Salam wa minkas-salam, tabarakta ya Dhal-Jalali wal-Ikram — O Allah, You are Peace and from You comes peace. Blessed are You, full of Majesty and Honour.',
+    'Recite Ayat-ul-Kursi',
+    'SubhanAllah ×33 · Alhamdulillah ×33 · Allahu Akbar ×34',
+  ];
+  const DUA_TEXT = DUA_CONTENT.join('     ·     ');
+
+  const ticker       = document.querySelector('.ev-ticker');
+  const tickerSpans  = ticker ? ticker.querySelectorAll('span') : [];
+  let   duaMode      = false;
+
+  function setTickerMode(dua) {
+    if (!ticker || !tickerSpans.length) return;
+    if (dua === duaMode) return;
+    duaMode = dua;
+    const text = dua
+      ? DUA_TEXT
+      : 'Pre-recorded online courses available — visit <strong>online.daralarqam.co.uk</strong>     ·     Support our mission — donate at <strong>daralarqam.co.uk/donate</strong>';
+    tickerSpans.forEach(s => { s.innerHTML = text; });
+    // Restart animation and recalculate width
+    ticker.style.animation = 'none';
+    ticker.offsetHeight; // force reflow
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        ticker.style.animation = '';
+        ticker.style.setProperty('--ticker-w', tickerSpans[0].offsetWidth + 'px');
+      });
+    });
+  }
+
   function checkBlackout() {
     const now  = new Date();
     const nowM = now.getHours() * 60 + now.getMinutes();
     const bo   = document.getElementById('blackout');
     const boPr = document.getElementById('bo-prayer');
-    let inBlackout = false, prayerName = '';
+    let inBlackout = false, inDua = false, prayerName = '';
     for (const p of PNAMES) {
       const jM = toMins(tod[`${p}_jamaah`]);
       if (jM === null) continue;
-      // Use a 30-minute window max, and only if jM is plausible for this prayer
       const diff = nowM - jM;
-      if (diff >= 0 && diff < 12) {
-        inBlackout = true;
-        prayerName = PLABELS[p];
-        break;
-      }
+      if (diff >= 0 && diff < 12) { inBlackout = true; prayerName = PLABELS[p]; break; }
+      if (diff >= 12 && diff < 32) { inDua = true; break; }
     }
     if (inBlackout) {
       boPr.textContent = prayerName;
@@ -1283,21 +1311,22 @@ function startActiveTracking(tod, tom) {
     } else {
       bo.classList.remove('active');
     }
+    setTickerMode(inDua);
   }
-  // Seamless ticker
-  (function() {
-    const ticker = document.querySelector('.ev-ticker');
-    if (!ticker) return;
-    const spans = ticker.querySelectorAll('span');
-    if (!spans.length) return;
-    requestAnimationFrame(() => {
-      const w = spans[0].offsetWidth;
-      ticker.style.setProperty('--ticker-w', w + 'px');
-    });
-  })();
+
+  // Init ticker width
+  requestAnimationFrame(() => {
+    if (ticker && tickerSpans.length) {
+      ticker.style.setProperty('--ticker-w', tickerSpans[0].offsetWidth + 'px');
+    }
+  });
 
   checkBlackout();
   setInterval(checkBlackout, 1000);
+
+  // DEMO: show dua ticker for 30s — remove after testing
+  setTimeout(() => setTickerMode(true), 500);
+  setTimeout(() => setTickerMode(false), 30000);
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────

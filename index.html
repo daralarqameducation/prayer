@@ -1213,7 +1213,11 @@ async function init() {
     let jummahTimes = [];
     try {
       const jRows = await fetchSheet('JummahTimes');
-      jummahTimes = jRows.filter(r => r['time']).map(r => ({ label: r['label'] || 'Jumuʼah', time: r['time'] }));
+      jummahTimes = jRows.filter(r => r['time']).map(r => {
+        let label = r['label'] || "Jumu'ah";
+        if (label.toLowerCase().includes('khutbah') || label.toLowerCase().includes('jummah')) label = "Jumu'ah";
+        return { label, time: r['time'] };
+      });
     } catch(e) { console.warn('JummahTimes fetch failed', e); }
 
     const mosque = {

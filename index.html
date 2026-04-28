@@ -504,7 +504,7 @@
   }
 
   .p-jamaah-wrap { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 0; }
-  @media (max-width: 768px) { .p-jamaah-wrap { align-items: center; } }
+  @media (max-width: 600px) { .p-jamaah-wrap { align-items: center; } }
   .p-jamaah {
     font-size: clamp(1.1rem, 2.8vh, 2.4rem);
     font-weight: 700;
@@ -682,207 +682,271 @@
     }
   }
 
-  @media (max-width: 768px) {
-    html { height: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch; font-size: 100%; }
-    body { background: var(--bg2); overflow-y: auto; height: 100%; }
+  @media (max-width: 600px) {
+    html,
+    body {
+      height: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      background: var(--bg2);
+    }
 
     #app {
       display: flex !important;
       flex-direction: column !important;
       align-items: stretch !important;
-      height: auto !important;
-      min-height: 100vh !important;
-      padding: 8px !important;
-      overflow: visible !important;
-      gap: 0 !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      min-height: 0 !important;
+      padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom)) !important;
+      overflow: hidden !important;
+      gap: 6px !important;
     }
 
-    .sidebar { display: none; }
+    .sidebar,
+    #events-panel,
+    .p-name-ar,
+    .pg-label,
+    .mb-center,
+    .f-brand,
+    .f-spacer {
+      display: none !important;
+    }
 
     #mobile-info {
       display: flex !important;
       align-items: center;
-      gap: 8px;
-      background: var(--bg);
-      border: 1px solid rgba(200,164,110,0.35);
-      border-radius: 12px;
-      padding: 8px 12px;
-      margin-bottom: 6px;
-      flex-shrink: 0;
+      gap: 10px;
       order: 1;
-    }
-    #mobile-info .mi-name { font-size: 1.1rem !important; }
-    #mobile-info .mi-hijri { font-size: 0.8rem !important; }
-    #mobile-info .mi-clock { font-size: 1.6rem !important; }
-    #mobile-info .mi-logo { height: 40px !important; }
-    .prayer-row {
-      flex: none !important;
-      padding: 8px 14px !important;
-      display: grid;
-      grid-template-columns: 1.4fr 1fr 1fr 1fr;
-      border-bottom: 1px solid var(--border);
-      align-items: center;
-      line-height: 1.3;
-    }
-    #rows { display: flex; flex-direction: column; }
-    .p-name { font-size: 1.1rem !important; line-height: 1.3 !important; }
-    .p-begins, .p-tomorrow { font-size: 0.95rem !important; line-height: 1.3 !important; }
-    .p-jamaah { font-size: 1rem !important; line-height: 1.3 !important; }
-    .p-name-ar { display: none; }
-
-    #slide-wrap { flex-direction: column; gap: 0; order: 2; display: flex; }
-    #prayer-panel { display: flex; flex-direction: column; }
-    #events-panel {
-      display: flex !important;
-      flex-direction: column;
-      width: 100% !important;
+      flex: 0 0 58px;
+      min-height: 58px;
+      margin: 0 !important;
+      padding: 8px 12px;
       background: var(--bg);
       border: 1px solid rgba(200,164,110,0.35);
       border-radius: 12px;
-      overflow: hidden;
-      margin-top: 8px;
-      flex-shrink: 0;
-      max-height: 280px;
     }
-    .mi-name {
-      font-size: 0.72rem; font-weight: 700;
-      color: var(--text); line-height: 1.2;
-      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    #mobile-info .mi-logo { height: 42px !important; }
+    #mobile-info .mi-name {
+      font-size: 1.12rem !important;
+      font-weight: 800;
+      line-height: 1.05;
     }
-    .mi-address {
-      font-size: 0.52rem; color: var(--muted);
-      line-height: 1.4; margin-top: 2px;
-      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    #mobile-info .mi-hijri {
+      font-size: 0.78rem !important;
+      line-height: 1.2;
+      margin-top: 4px;
     }
-    .mi-hijri {
-      font-size: 0.52rem; color: var(--gold);
-      opacity: 0.75; margin-top: 2px; line-height: 1.4;
+    #mobile-info .mi-clock {
+      font-size: 1.65rem !important;
+      line-height: 1;
     }
-    .mi-divider {
-      width: 1px; align-self: stretch;
-      background: var(--border2); flex-shrink: 0;
-    }
-    .mi-clock {
-      font-size: 1.2rem; font-weight: 500;
-      color: var(--text); line-height: 1;
-      font-variant-numeric: tabular-nums;
-      white-space: nowrap; flex-shrink: 0; text-align: right;
-    }
-    .mi-ampm {
-      font-size: 0.65rem; font-weight: 600;
-      color: var(--muted); margin-left: 2px;
-      text-transform: uppercase; letter-spacing: 0.05em;
+    #mobile-info .mi-ampm {
+      font-size: 0.65rem !important;
+      letter-spacing: 0.04em;
     }
 
-    .prayer-row {
-      flex: 1 !important;
+    #slide-wrap {
+      order: 2;
+      display: flex;
+      flex: 1 1 auto;
       min-height: 0;
-      display: grid;
-      grid-template-columns: 1.5fr 1fr 1fr 1fr;
-      padding: 0 14px;
-      border-bottom: 1px solid var(--border);
-      align-items: center;
+      flex-direction: column;
+      gap: 0;
     }
-    #rows { display: flex; flex-direction: column; flex: 1; min-height: 0; }
-    .pg-label { display: none !important; }
 
-    #mobile-banner {
-      display: flex !important;
-      align-items: center;
-      justify-content: space-between;
-      background: var(--bg);
+    #prayer-panel {
+      display: flex;
+      flex: 1 1 auto;
+      min-height: 0;
+      flex-direction: column;
+    }
+
+    .main {
+      display: flex;
+      flex: 1 1 auto;
+      min-height: 0;
+      flex-direction: column;
+      overflow: hidden;
       border: 1px solid rgba(200,164,110,0.35);
-      border-radius: 12px;
-      margin-top: 8px;
-      padding: 10px 14px;
-      flex-shrink: 0;
+      border-bottom: none;
+      border-radius: 12px 12px 0 0;
     }
-    .mb-right { text-align: right; }
-    #events-panel { display: none !important; }
-    #slide-wrap { flex-direction: column; gap: 0; flex: 1; display: flex; }
-    #prayer-panel { flex: 1; display: flex; flex-direction: column; }
-    .mb-label {
-      font-size: 0.6rem; font-weight: 700;
-      letter-spacing: 0.13em; text-transform: uppercase;
-      color: var(--text); margin-bottom: 3px;
+
+    .pg-header,
+    .prayer-row {
+      grid-template-columns: minmax(82px, 1.25fr) repeat(3, minmax(58px, 0.9fr));
     }
-    .mb-prayer {
-      font-size: 1rem; font-weight: 500;
-      color: var(--gold); line-height: 1;
-    }
-    .mb-right .mb-label { text-align: right; }
-    .mb-countdown {
-      font-size: 1rem; font-weight: 500;
-      color: var(--gold); line-height: 1;
-      font-variant-numeric: tabular-nums;
-    }
-    .mb-center { display: none !important; }
 
     .pg-header {
       display: grid;
-      grid-template-columns: 1.4fr 1fr 1fr 1fr;
-      padding: 3px 12px;
+      flex: 0 0 28px;
+      align-items: center;
+      padding: 0 12px;
       border-bottom: 1px solid var(--border);
       margin-top: 0;
     }
     .pg-header span {
-      font-size: 0.72rem; font-weight: 700;
-      letter-spacing: 0.08em; color: var(--text2);
-      text-align: center; padding: 0;
+      padding: 0 !important;
+      text-align: center;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.07em;
+      color: var(--text2);
     }
-    .pg-header span:first-child { text-align: left; display: block; visibility: hidden; }
-    .prayer-row { grid-template-columns: 1.4fr 1fr 1fr 1fr; }
-    .p-name { font-size: clamp(0.85rem, 2.2vh, 1rem) !important; }
-    .p-begins { font-size: clamp(0.75rem, 1.9vh, 0.9rem) !important; }
-    .p-jamaah { font-size: clamp(0.8rem, 2vh, 0.95rem) !important; }
-    .p-tomorrow { font-size: clamp(0.7rem, 1.8vh, 0.85rem) !important; }
-    .p-name { font-size: 1rem !important; font-weight: 700; color: var(--text); text-align: left; }
-    .p-name-ar { display: none; }
-    .p-begins { font-size: 0.85rem !important; font-weight: 400; color: var(--muted); text-align: center; padding: 0; }
-    .p-jamaah { font-size: 0.9rem !important; font-weight: 800; color: var(--text); text-align: center; padding-left: 0; }
-    .prayer-row.active .p-jamaah { color: var(--gold); }
-    .p-cell { padding: 0 !important; }
-    .p-cell.p-jamaah-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 !important; min-height: 100%; }
-    .p-cell.p-jamaah-wrap .iqamah-bar-wrap,
-    .p-cell.p-jamaah-wrap .iqamah-label { display: none !important; }
-    .p-tomorrow { font-size: 0.8rem !important; font-weight: 400; color: var(--muted); text-align: center; padding: 0; }
+    .pg-header span:first-child {
+      display: block;
+      visibility: hidden;
+      text-align: left;
+    }
 
-    #app { display: flex; flex-direction: column; height: 100vh !important; overflow: hidden !important; }
-    .main {
-      border: 1px solid rgba(200,164,110,0.35);
-      border-radius: 12px 12px 0 0;
-      border-bottom: none;
-      overflow: hidden;
-      flex: 1;
+    #rows {
       display: flex;
-      flex-direction: column;
+      flex: 1 1 auto;
       min-height: 0;
+      flex-direction: column;
     }
+
+    .prayer-row {
+      display: grid;
+      flex: 1 1 0;
+      min-height: 0;
+      align-items: center;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--border);
+      line-height: 1.15;
+    }
+    .prayer-row:last-child { border-bottom: none; }
+
+    .p-cell {
+      padding: 0 !important;
+      text-align: center;
+    }
+    .p-name-wrap { gap: 0; }
+    .p-name {
+      font-size: 1.12rem !important;
+      font-weight: 800;
+      line-height: 1.1 !important;
+      text-align: left;
+    }
+    .p-begins,
+    .p-tomorrow {
+      font-size: 0.98rem !important;
+      line-height: 1.1 !important;
+      color: var(--text2);
+      text-align: center;
+    }
+    .p-jamaah {
+      font-size: 1.08rem !important;
+      font-weight: 900;
+      line-height: 1.1 !important;
+      text-align: center;
+    }
+    .p-cell.p-jamaah-wrap {
+      display: flex;
+      min-height: 100%;
+      align-items: center;
+      justify-content: center;
+      padding: 0 !important;
+    }
+    .p-cell.p-jamaah-wrap .iqamah-bar-wrap,
+    .p-cell.p-jamaah-wrap .iqamah-label {
+      display: none !important;
+    }
+    .prayer-row.active .p-jamaah { color: var(--gold); }
+
     .footer-row {
+      display: flex !important;
+      flex: 0 0 54px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      background: var(--bg);
       border: 1px solid rgba(200,164,110,0.35);
       border-top: none;
       border-radius: 0 0 12px 12px;
-      padding: 8px 14px;
-      display: flex !important;
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: center;
-      background: var(--bg);
-      flex-shrink: 0;
     }
-    .f-brand { display: none !important; }
-    .f-spacer { display: none !important; }
-    .footer-row .f-cell { display: flex !important; flex-direction: column; gap: 4px; }
-    .footer-row .f-cell:last-child { align-items: flex-end; text-align: right; }
+    .footer-row .f-cell {
+      display: flex !important;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .footer-row .f-cell:last-child {
+      align-items: flex-end;
+      text-align: right;
+    }
     .footer-row .f-label {
-      font-size: 0.72rem !important; font-weight: 700;
-      text-transform: uppercase; letter-spacing: 0.13em;
+      font-size: 0.7rem !important;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
       color: var(--text2);
     }
     .footer-row .f-value {
-      font-size: 1rem !important; font-weight: 500;
+      font-size: 1.1rem !important;
+      font-weight: 700;
+      line-height: 1;
       color: var(--gold);
     }
+
+    #mobile-banner {
+      display: flex !important;
+      flex: 0 0 52px;
+      align-items: center;
+      justify-content: space-between;
+      margin: 6px 0 0;
+      padding: 8px 14px;
+      background: var(--bg);
+      border: 1px solid rgba(200,164,110,0.35);
+      border-radius: 12px;
+    }
+    .mb-label {
+      margin-bottom: 3px;
+      font-size: 0.66rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+    .mb-prayer,
+    .mb-countdown {
+      font-size: 1.08rem;
+      font-weight: 700;
+      line-height: 1;
+      color: var(--gold);
+      font-variant-numeric: tabular-nums;
+    }
+    .mb-right { text-align: right; }
+  }
+
+  @media (max-width: 380px) and (max-height: 680px) {
+    #mobile-info {
+      flex-basis: 52px;
+      min-height: 52px;
+      padding: 6px 10px;
+    }
+    #mobile-info .mi-logo { height: 36px !important; }
+    #mobile-info .mi-name { font-size: 1rem !important; }
+    #mobile-info .mi-hijri { font-size: 0.68rem !important; }
+    #mobile-info .mi-clock { font-size: 1.45rem !important; }
+    .pg-header { flex-basis: 24px; }
+    .p-name { font-size: 1.02rem !important; }
+    .p-begins,
+    .p-tomorrow { font-size: 0.9rem !important; }
+    .p-jamaah { font-size: 1rem !important; }
+    .footer-row { flex-basis: 48px; }
+    #mobile-banner { flex-basis: 48px; }
+  }
+
+  @media (max-width: 360px) {
+    #mi-logo-wrap { display: none !important; }
+    #mobile-info {
+      gap: 8px;
+      padding-left: 12px;
+    }
+    #mobile-info .mi-name { font-size: 1.04rem !important; }
+    #mobile-info .mi-clock { font-size: 1.42rem !important; }
+    #mobile-info .mi-ampm { font-size: 0.58rem !important; }
   }
 
   .f-jummah-item {
@@ -1248,7 +1312,7 @@ function startClock() {
 }
 
 // ── ACTIVE ROW + IQAMAH BARS ──────────────────────────────────────────────────
-function startActiveTracking(tod, tom) {
+function startActiveTracking(tod, tom, mosque) {
   function tick() {
     const now  = new Date();
     const nowS = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
@@ -1474,7 +1538,7 @@ async function init() {
       window._lastClassHash = JSON.stringify(initialRows);
     } catch(e) {}
     startClock();
-    startActiveTracking(tod, tom);
+    startActiveTracking(tod, tom, mosque);
 
     requestAnimationFrame(() => {
       const footer = document.querySelector('.footer-row');

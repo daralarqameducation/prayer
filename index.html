@@ -395,6 +395,23 @@
   }
   .ev-tag { display: inline-block; font-size: clamp(0.55rem, 0.9vh, 0.72rem); font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 2px 8px; border-radius: 4px; background: rgba(200,164,110,0.12); color: var(--gold); flex-shrink: 0; }
   .ev-tag-online { background: rgba(4,120,87,0.15); color: #34d399; }
+  .ev-tag-new {
+    display: inline-block;
+    font-size: clamp(0.5rem, 0.8vh, 0.65rem);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: rgba(224,190,120,0.2);
+    color: var(--gold-bright);
+    flex-shrink: 0;
+    animation: pulse-new 2s ease-in-out infinite;
+  }
+  @keyframes pulse-new {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.5; }
+  }
   .main {
     width: 100%;
     max-width: none;
@@ -947,7 +964,7 @@
     <div class="ev-footer">
       <div class="ev-ticker-wrap">
         <div class="ev-ticker">
-          <span>1. Astaghfirullah (×3) — I seek forgiveness from Allah&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;2. Allahumma Antas-Salam wa minkas-salam, tabarakta ya Dhal-Jalali wal-Ikram — O Allah, You are Peace and from You comes peace. Blessed are You, full of Majesty and Honour&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;3. Recite Ayat-ul-Kursi (Surah Al-Baqarah 2:255) — Protects the believer until the next prayer&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;4. Tasbih Fatimah: SubhanAllah ×33 · Alhamdulillah ×33 · Allahu Akbar ×34&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;</span><span>1. Astaghfirullah (×3) — I seek forgiveness from Allah&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;2. Allahumma Antas-Salam wa minkas-salam, tabarakta ya Dhal-Jalali wal-Ikram — O Allah, You are Peace and from You comes peace. Blessed are You, full of Majesty and Honour&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;3. Recite Ayat-ul-Kursi (Surah Al-Baqarah 2:255) — Protects the believer until the next prayer&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;4. Tasbih Fatimah: SubhanAllah ×33 · Alhamdulillah ×33 · Allahu Akbar ×34&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;</span>
+          <span>Pre-recorded online courses available — visit <strong>online.daralarqam.co.uk</strong>&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;Support our mission — donate at <strong>daralarqam.co.uk/donate</strong>&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;</span><span>Pre-recorded online courses available — visit <strong>online.daralarqam.co.uk</strong>&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;Support our mission — donate at <strong>daralarqam.co.uk/donate</strong>&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;</span>
         </div>
       </div>
     </div>
@@ -1031,7 +1048,12 @@ const PLABELS = { fajr:'Fajr', zuhr:'Zuhr', asr:'Asr', maghrib:'Maghrib', isha:'
 const ARABIC  = { fajr:'الفجر', zuhr:'الظهر', asr:'العصر', maghrib:'المغرب', isha:'العشاء' };
 
 // ── GOOGLE SHEETS FETCH ───────────────────────────────────────────────────────
+const _sheetCache = {};
 async function fetchSheet(tabName) {
+  const cacheKey = tabName;
+  const cached = _sheetCache[cacheKey];
+  if (cached && Date.now() - cached.ts < 5 * 60 * 1000) return cached.data;
+
   const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tabName)}`;
   const r = await fetch(url);
   const text = await r.text();
@@ -1039,13 +1061,11 @@ async function fetchSheet(tabName) {
   const end = text.lastIndexOf('}');
   const json = JSON.parse(text.slice(start, end + 1));
   const cols = json.table.cols.map(c => c.label.trim());
-  return json.table.rows.map(row => {
+  const result = json.table.rows.map(row => {
     const obj = {};
     row.c.forEach((cell, i) => {
       if (!cell) { obj[cols[i]] = null; return; }
-      // Prefer formatted string; fall back to raw value
       let val = cell.f != null ? cell.f : cell.v;
-      // If raw value is a decimal fraction (gviz time type), convert to HH:MM
       if (val == null && typeof cell.v === 'number' && cell.v > 0 && cell.v < 1) {
         const totalMins = Math.round(cell.v * 24 * 60);
         val = `${Math.floor(totalMins/60)}:${String(totalMins%60).padStart(2,'0')}`;
@@ -1054,6 +1074,8 @@ async function fetchSheet(tabName) {
     });
     return obj;
   });
+  _sheetCache[cacheKey] = { data: result, ts: Date.now() };
+  return result;
 }
 
 // Convert sheet time string to 24h "H:MM" string given minimum expected hour
@@ -1318,49 +1340,17 @@ function startActiveTracking(tod, tom) {
   tickMobile();
   setInterval(tickMobile, 1000);
 
-  const DUA_CONTENT = [
-    'Astaghfirullah (×3) — I seek forgiveness from Allah',
-    'Allahumma Antas-Salam wa minkas-salam, tabarakta ya Dhal-Jalali wal-Ikram — O Allah, You are Peace and from You comes peace. Blessed are You, full of Majesty and Honour.',
-    'Recite Ayat-ul-Kursi',
-    'SubhanAllah ×33 · Alhamdulillah ×33 · Allahu Akbar ×34',
-  ];
-  const DUA_TEXT = DUA_CONTENT.join('     ·     ');
-
-  const ticker       = document.querySelector('.ev-ticker');
-  const tickerSpans  = ticker ? ticker.querySelectorAll('span') : [];
-  let   duaMode      = false;
-
-  function setTickerMode(dua) {
-    if (!ticker || !tickerSpans.length) return;
-    if (dua === duaMode) return;
-    duaMode = dua;
-    const text = dua
-      ? DUA_TEXT
-      : 'Pre-recorded online courses available — visit <strong>online.daralarqam.co.uk</strong>     ·     Support our mission — donate at <strong>daralarqam.co.uk/donate</strong>';
-    tickerSpans.forEach(s => { s.innerHTML = text; });
-    // Restart animation and recalculate width
-    ticker.style.animation = 'none';
-    ticker.offsetHeight; // force reflow
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        ticker.style.animation = '';
-        ticker.style.setProperty('--ticker-w', tickerSpans[0].offsetWidth + 'px');
-      });
-    });
-  }
-
   function checkBlackout() {
     const now  = new Date();
     const nowM = now.getHours() * 60 + now.getMinutes();
     const bo   = document.getElementById('blackout');
     const boPr = document.getElementById('bo-prayer');
-    let inBlackout = false, inDua = false, prayerName = '';
+    let inBlackout = false, prayerName = '';
     for (const p of PNAMES) {
       const jM = toMins(tod[`${p}_jamaah`]);
       if (jM === null) continue;
       const diff = nowM - jM;
       if (diff >= 0 && diff < 12) { inBlackout = true; prayerName = PLABELS[p]; break; }
-      if (diff >= 12 && diff < 32) { inDua = true; break; }
     }
     if (inBlackout) {
       boPr.textContent = prayerName;
@@ -1368,10 +1358,11 @@ function startActiveTracking(tod, tom) {
     } else {
       bo.classList.remove('active');
     }
-    setTickerMode(inDua);
   }
 
   // Init ticker width
+  const ticker      = document.querySelector('.ev-ticker');
+  const tickerSpans = ticker ? ticker.querySelectorAll('span') : [];
   requestAnimationFrame(() => {
     if (ticker && tickerSpans.length) {
       ticker.style.setProperty('--ticker-w', tickerSpans[0].offsetWidth + 'px');
@@ -1380,10 +1371,6 @@ function startActiveTracking(tod, tom) {
 
   checkBlackout();
   setInterval(checkBlackout, 1000);
-
-  // DEMO: show dua ticker for 30s — remove after testing
-  setTimeout(() => setTickerMode(true), 500);
-  setTimeout(() => setTickerMode(false), 30000);
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
@@ -1599,13 +1586,24 @@ async function initEvents() {
   // Format display label
   EVENTS = EVENTS.map(ev => {
     let dayLabel;
+    let isNew = false;
     const startDate = parseDate(ev.start_date);
+
     if (startDate && startDate > today) {
-      // Course hasn't started yet
+      // Course hasn't started — show "Saturday 2nd May"
+      isNew = true;
       const diffDays = Math.round((startDate - today) / 86400000);
-      if (diffDays === 0)      dayLabel = 'Today';
-      else if (diffDays === 1) dayLabel = 'Tomorrow';
-      else                     dayLabel = 'Starts ' + startDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+      if (diffDays === 0) {
+        dayLabel = 'Today';
+      } else if (diffDays === 1) {
+        dayLabel = 'Tomorrow';
+      } else {
+        const dayName = DAYS[startDate.getDay()];
+        const d = startDate.getDate();
+        const suffix = d === 1||d === 21||d === 31 ? 'st' : d === 2||d === 22 ? 'nd' : d === 3||d === 23 ? 'rd' : 'th';
+        const mon = startDate.toLocaleDateString('en-GB', { month: 'long' });
+        dayLabel = `${dayName} ${d}${suffix} ${mon}`;
+      }
     } else if (!ev.day || ev.day === 'Daily') {
       dayLabel = 'Daily';
     } else {
@@ -1614,7 +1612,7 @@ async function initEvents() {
       else if (score === 1) dayLabel = 'Tomorrow';
       else                  dayLabel = ev.day;
     }
-    return { ...ev, timeLabel: ev.time ? `${dayLabel} · ${fmtAmPm(normTimeTo24(ev.time, 0))}` : dayLabel };
+    return { ...ev, isNew, timeLabel: ev.time ? `${dayLabel} · ${fmtAmPm(normTimeTo24(ev.time, 0))}` : dayLabel };
   });
 
   // Determine how many items fit per page based on panel height

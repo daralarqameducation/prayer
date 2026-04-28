@@ -1519,12 +1519,36 @@ async function initEvents() {
     EVENTS = rows
       .filter(r => r['title'] && r['title'].toLowerCase() !== 'title')
       .map(r => ({
-        day:   (r['day']   || 'Daily').trim(),
+        day:   (r['day']   || '').trim(),
+        date:  (r['date']  || '').trim(),
         time:  (r['time']  || '').trim(),
         title: (r['title'] || '').trim(),
         desc:  (r['desc']  || '').trim(),
         tag:   (r['tag']   || 'Class').trim(),
       }));
+
+  // Parse a date string DD/MM/YYYY or MM/DD/YYYY or YYYY-MM-DD into a Date
+  function parseDate(s) {
+    if (!s) return null;
+    s = s.trim();
+    // DD/MM/YYYY
+    let m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (m) return new Date(+m[3], +m[2]-1, +m[1]);
+    // YYYY-MM-DD
+    m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (m) return new Date(+m[1], +m[2]-1, +m[3]);
+    return null;
+  }
+
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  // Filter out past one-off events
+  EVENTS = EVENTS.filter(ev => {
+    if (!ev.date) return true; // recurring — always show
+    const d = parseDate(ev.date);
+    if (!d) return true;
+    return d >= today;
+  });
   } catch(e) {
     console.error('Classes fetch failed:', e);
     return;
@@ -1554,24 +1578,45 @@ async function initEvents() {
     return h * 60 + min;
   }
 
+  // Sort: Daily first, then by date/day ascending
   EVENTS.sort((a, b) => {
-    const sa = dayScore(a.day), sb = dayScore(b.day);
-    if (sa !== sb) {
-      if (sa === -1) return -1;
-      if (sb === -1) return 1;
-      return sa - sb;
-    }
+    const aDate = parseDate(a.date);
+    const bDate = parseDate(b.date);
+    const sa = a.day ? dayScore(a.day) : 999;
+    const sb = b.day ? dayScore(b.day) : 999;
+
+    // Daily always first
+    if (a.day === 'Daily' && b.day !== 'Daily') return -1;
+    if (b.day === 'Daily' && a.day !== 'Daily') return 1;
+
+    // One-off date vs recurring
+    if (aDate && !bDate) return 1;   // one-off after recurring
+    if (!aDate && bDate) return -1;
+    if (aDate && bDate) return aDate - bDate;
+
+    // Both recurring
+    if (sa !== sb) return sa - sb;
     return timeMins(a.time) - timeMins(b.time);
   });
 
   // Format display label
   EVENTS = EVENTS.map(ev => {
-    const score = dayScore(ev.day);
     let dayLabel;
-    if (ev.day === 'Daily')  dayLabel = 'Daily';
-    else if (score === 0)    dayLabel = 'Today';
-    else if (score === 1)    dayLabel = 'Tomorrow';
-    else                     dayLabel = ev.day;
+    const aDate = parseDate(ev.date);
+    if (aDate) {
+      // One-off: show "Starts 7 May" or "Today" if it's today
+      const diffDays = Math.round((aDate - today) / 86400000);
+      if (diffDays === 0)      dayLabel = 'Today';
+      else if (diffDays === 1) dayLabel = 'Tomorrow';
+      else                     dayLabel = 'Starts ' + aDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    } else if (!ev.day || ev.day === 'Daily') {
+      dayLabel = 'Daily';
+    } else {
+      const score = dayScore(ev.day);
+      if (score === 0)      dayLabel = 'Today';
+      else if (score === 1) dayLabel = 'Tomorrow';
+      else                  dayLabel = ev.day;
+    }
     return { ...ev, timeLabel: ev.time ? `${dayLabel} · ${fmtAmPm(normTimeTo24(ev.time, 0))}` : dayLabel };
   });
 

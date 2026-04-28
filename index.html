@@ -694,10 +694,19 @@
       flex-shrink: 0;
       order: 1;
     }
-    #mobile-info .mi-name { font-size: 0.95rem !important; }
-    #mobile-info .mi-hijri { font-size: 0.72rem !important; }
-    #mobile-info .mi-clock { font-size: 1.4rem !important; }
-    #mobile-info .mi-logo { height: 36px !important; }
+    .prayer-row {
+      flex: none !important;
+      padding: 8px 14px !important;
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1fr 1fr;
+      border-bottom: 1px solid var(--border);
+      align-items: center;
+    }
+    #rows { display: flex; flex-direction: column; }
+    .p-name { font-size: 0.95rem !important; }
+    .p-begins, .p-tomorrow { font-size: 0.8rem !important; }
+    .p-jamaah { font-size: 0.88rem !important; }
+    .p-name-ar { display: none; }
 
     #slide-wrap { flex-direction: column; gap: 0; order: 2; display: flex; }
     #prayer-panel { display: flex; flex-direction: column; }
@@ -820,6 +829,7 @@
     .main {
       border: 1px solid rgba(200,164,110,0.35);
       border-radius: 12px 12px 0 0;
+      border-bottom: none;
       overflow: hidden;
       flex: 1;
       display: flex;
@@ -827,18 +837,15 @@
       min-height: 0;
     }
     .footer-row {
-      order: 2;
-      border-top: 1px solid var(--border);
       border: 1px solid rgba(200,164,110,0.35);
       border-top: none;
-      border-radius: 0 0 18px 18px;
+      border-radius: 0 0 12px 12px;
       padding: 8px 14px;
       display: flex !important;
       flex-direction: row;
       justify-content: space-between;
       align-items: center;
       background: var(--bg);
-      margin-bottom: 0;
       flex-shrink: 0;
     }
     .f-brand { display: none !important; }

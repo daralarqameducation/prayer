@@ -499,11 +499,10 @@
       flex-direction: column !important;
       align-items: stretch !important;
       justify-content: flex-start !important;
-      height: auto !important;
-      min-height: 100vh !important;
-      padding: 10px !important;
-      padding-top: 8px !important;
-      overflow: visible !important;
+      height: 100vh !important;
+      min-height: unset !important;
+      padding: 6px !important;
+      overflow: hidden !important;
       gap: 0 !important;
     }
 
@@ -595,7 +594,7 @@
     .pg-header {
       display: grid;
       grid-template-columns: 1.5fr 1fr 1fr 1fr;
-      padding: 8px 14px;
+      padding: 5px 14px;
       border-bottom: 1px solid var(--border);
       margin-top: 0;
     }
@@ -605,17 +604,20 @@
       text-align: center; padding: 0;
     }
     .pg-header span:first-child { text-align: left; }
-    .p-name { font-size: 1rem !important; }
-    .p-begins { font-size: 0.85rem !important; }
-    .p-jamaah { font-size: 0.9rem !important; }
-    .p-tomorrow { font-size: 0.8rem !important; }
+    .p-name { font-size: clamp(0.85rem, 2.2vh, 1rem) !important; }
+    .p-begins { font-size: clamp(0.75rem, 1.9vh, 0.9rem) !important; }
+    .p-jamaah { font-size: clamp(0.8rem, 2vh, 0.95rem) !important; }
+    .p-tomorrow { font-size: clamp(0.7rem, 1.8vh, 0.85rem) !important; }
     .prayer-row {
       display: grid;
       grid-template-columns: 1.5fr 1fr 1fr 1fr;
-      padding: 9px 14px;
+      padding: 0 14px;
       border-bottom: 1px solid var(--border);
       align-items: center;
+      flex: 1 !important;
+      min-height: 0;
     }
+    #rows { display: flex; flex-direction: column; flex: 1 !important; min-height: 0; }
     .p-name { font-size: 1rem !important; font-weight: 700; color: var(--text); text-align: left; }
     .p-name-ar { display: none; }
     .p-begins { font-size: 0.85rem !important; font-weight: 400; color: var(--muted); text-align: center; padding: 0; }
@@ -627,10 +629,13 @@
     .p-cell.p-jamaah-wrap .iqamah-label { display: none !important; }
     .p-tomorrow { font-size: 0.8rem !important; font-weight: 400; color: var(--muted); text-align: center; padding: 0; }
 
-    #app { display: flex; flex-direction: column; }
+    #app { display: flex; flex-direction: column; height: 100vh !important; overflow: hidden !important; }
     .main {
       order: 1;
       border-radius: 18px 18px 0 0;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
     }
     .footer-row {
       order: 2;
@@ -638,11 +643,13 @@
       border: 1px solid rgba(200,164,110,0.35);
       border-top: none;
       border-radius: 0 0 18px 18px;
-      padding: 18px 20px;
-      display: grid !important;
-      grid-template-columns: 1fr 1fr;
+      padding: 8px 14px;
+      display: flex !important;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
       background: var(--bg);
-      margin-bottom: 16px;
+      margin-bottom: 8px;
     }
     .f-brand { display: none !important; }
     .f-spacer { display: none !important; }
@@ -729,12 +736,7 @@
 <body>
 
 <!-- Loading -->
-<div id="loading">
-  <div class="l-logo">Prayer Times</div>
-  <div class="l-dots">
-    <div class="l-dot"></div><div class="l-dot"></div><div class="l-dot"></div>
-  </div>
-</div>
+<div id="loading" style="display:none"></div>
 
 <!-- Error -->
 <div id="error">

@@ -1519,35 +1519,46 @@ async function initEvents() {
     EVENTS = rows
       .filter(r => r['title'] && r['title'].toLowerCase() !== 'title')
       .map(r => ({
-        day:   (r['day']   || '').trim(),
-        date:  (r['date']  || '').trim(),
-        time:  (r['time']  || '').trim(),
-        title: (r['title'] || '').trim(),
-        desc:  (r['desc']  || '').trim(),
-        tag:   (r['tag']   || 'Class').trim(),
+        day:        (r['day']        || '').trim(),
+        start_date: (r['start_date'] || '').trim(),
+        weeks:      parseInt(r['weeks'] || '0', 10) || 0,
+        time:       (r['time']       || '').trim(),
+        title:      (r['title']      || '').trim(),
+        desc:       (r['desc']       || '').trim(),
+        tag:        (r['tag']        || 'Class').trim(),
       }));
 
-  // Parse a date string DD/MM/YYYY or MM/DD/YYYY or YYYY-MM-DD into a Date
   function parseDate(s) {
     if (!s) return null;
     s = s.trim();
-    // DD/MM/YYYY
     let m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
     if (m) return new Date(+m[3], +m[2]-1, +m[1]);
-    // YYYY-MM-DD
     m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
     if (m) return new Date(+m[1], +m[2]-1, +m[3]);
     return null;
   }
 
-  const today = new Date(); today.setHours(0,0,0,0);
+  const now      = new Date();
+  const today    = new Date(); today.setHours(0,0,0,0);
+  const DAYS     = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const nowMinsTotal = now.getHours() * 60 + now.getMinutes();
 
-  // Filter out past one-off events
+  function timeMins(t) {
+    if (!t) return 0;
+    const m = t.match(/(\d+):(\d+)/);
+    if (!m) return 0;
+    let h = +m[1], min = +m[2];
+    if (/pm/i.test(t) && h < 12) h += 12;
+    return h * 60 + min;
+  }
+
+  // Filter out courses that have ended (start_date + weeks * 7 days)
   EVENTS = EVENTS.filter(ev => {
-    if (!ev.date) return true; // recurring — always show
-    const d = parseDate(ev.date);
-    if (!d) return true;
-    return d >= today;
+    if (!ev.start_date || !ev.weeks) return true; // ongoing — always show
+    const start = parseDate(ev.start_date);
+    if (!start) return true;
+    const endDate = new Date(start.getTime() + ev.weeks * 7 * 86400000);
+    return today <= endDate;
   });
   } catch(e) {
     console.error('Classes fetch failed:', e);
@@ -1556,10 +1567,7 @@ async function initEvents() {
 
   if (!EVENTS.length) return;
 
-  // Sort by upcoming day then by time within day. Daily always included.
-  const DAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  const todayIdx = new Date().getDay();
-  const nowMins  = new Date().getHours() * 60 + new Date().getMinutes();
+  const todayIdx = now.getDay();
 
   function dayScore(day) {
     if (day === 'Daily') return -1;
@@ -1568,33 +1576,22 @@ async function initEvents() {
     return (idx - todayIdx + 7) % 7;
   }
 
-  function timeMins(t) {
-    if (!t) return 0;
-    const m = t.match(/(\d+):(\d+)/);
-    if (!m) return 0;
-    let h = +m[1], min = +m[2];
-    // crude PM detection for display times like "7:00 PM"
-    if (/pm/i.test(t) && h < 12) h += 12;
-    return h * 60 + min;
-  }
-
-  // Sort: Daily first, then by date/day ascending
   EVENTS.sort((a, b) => {
-    const aDate = parseDate(a.date);
-    const bDate = parseDate(b.date);
+    const aStart = parseDate(a.start_date);
+    const bStart = parseDate(b.start_date);
     const sa = a.day ? dayScore(a.day) : 999;
     const sb = b.day ? dayScore(b.day) : 999;
 
-    // Daily always first
     if (a.day === 'Daily' && b.day !== 'Daily') return -1;
     if (b.day === 'Daily' && a.day !== 'Daily') return 1;
 
-    // One-off date vs recurring
-    if (aDate && !bDate) return 1;   // one-off after recurring
-    if (!aDate && bDate) return -1;
-    if (aDate && bDate) return aDate - bDate;
+    // Not-yet-started courses go after active ones
+    const aFuture = aStart && aStart > today;
+    const bFuture = bStart && bStart > today;
+    if (aFuture && !bFuture) return 1;
+    if (!aFuture && bFuture) return -1;
+    if (aFuture && bFuture) return aStart - bStart;
 
-    // Both recurring
     if (sa !== sb) return sa - sb;
     return timeMins(a.time) - timeMins(b.time);
   });
@@ -1602,13 +1599,13 @@ async function initEvents() {
   // Format display label
   EVENTS = EVENTS.map(ev => {
     let dayLabel;
-    const aDate = parseDate(ev.date);
-    if (aDate) {
-      // One-off: show "Starts 7 May" or "Today" if it's today
-      const diffDays = Math.round((aDate - today) / 86400000);
+    const startDate = parseDate(ev.start_date);
+    if (startDate && startDate > today) {
+      // Course hasn't started yet
+      const diffDays = Math.round((startDate - today) / 86400000);
       if (diffDays === 0)      dayLabel = 'Today';
       else if (diffDays === 1) dayLabel = 'Tomorrow';
-      else                     dayLabel = 'Starts ' + aDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+      else                     dayLabel = 'Starts ' + startDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
     } else if (!ev.day || ev.day === 'Daily') {
       dayLabel = 'Daily';
     } else {

@@ -1371,6 +1371,24 @@ function startActiveTracking(tod, tom) {
 
   checkBlackout();
   setInterval(checkBlackout, 1000);
+
+  // Auto-refresh classes & events every 5 minutes — only re-renders if data changed
+  let _lastClassHash = window._lastClassHash || '';
+  setInterval(async () => {
+    try {
+      delete _sheetCache['Classes'];
+      const newClassRows = await fetchSheet('Classes');
+      const hash = JSON.stringify(newClassRows);
+      if (hash === _lastClassHash) return;
+      _lastClassHash = hash;
+      window._lastClassHash = hash;
+      const evList = document.getElementById('ev-list');
+      const evDots = document.getElementById('ev-dots');
+      if (evList) evList.innerHTML = '';
+      if (evDots) evDots.innerHTML = '';
+      await initEvents(newClassRows);
+    } catch(e) { console.warn('Classes auto-refresh failed', e); }
+  }, 5 * 60 * 1000);
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
@@ -1409,6 +1427,11 @@ async function init() {
     renderRows(tod, tom);
     initJummahAnimator(mosque);
     await initEvents();
+    // Set initial hash for change detection
+    try {
+      const initialRows = await fetchSheet('Classes');
+      window._lastClassHash = JSON.stringify(initialRows);
+    } catch(e) {}
     startClock();
     startActiveTracking(tod, tom);
 

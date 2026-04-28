@@ -562,34 +562,33 @@
     }
 
     #mobile-banner {
-      display: none !important;
+      display: flex !important;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg);
+      border: 1px solid rgba(200,164,110,0.35);
+      border-radius: 12px;
+      margin-top: 10px;
+      padding: 10px 14px;
     }
     .mb-right { text-align: right; }
-    #mobile-iq-bar { display: block !important; }
+    #mobile-iq-bar { display: none !important; }
     .mb-label {
       font-size: 0.6rem; font-weight: 700;
       letter-spacing: 0.13em; text-transform: uppercase;
-      color: var(--text2); margin-bottom: 3px;
+      color: var(--text); margin-bottom: 3px;
     }
     .mb-prayer {
-      font-size: 0.9rem; font-weight: 500;
-      color: var(--text); line-height: 1;
+      font-size: 1rem; font-weight: 500;
+      color: var(--gold); line-height: 1;
     }
     .mb-right .mb-label { text-align: right; }
     .mb-countdown {
-      font-size: 0.9rem; font-weight: 500;
+      font-size: 1rem; font-weight: 500;
       color: var(--gold); line-height: 1;
       font-variant-numeric: tabular-nums;
     }
-    #mobile-iq-bar {
-      height: 3px;
-      background: var(--gold);
-      width: 0%;
-      margin: 0 16px;
-      border-radius: 0 0 3px 3px;
-      transition: width 1s linear;
-      box-shadow: 0 0 8px var(--gold);
-    }
+    .mb-center { display: none !important; }
 
     .pg-header {
       display: grid;
@@ -647,7 +646,7 @@
       justify-content: space-between;
       align-items: center;
       background: var(--bg);
-      margin-bottom: 8px;
+      margin-bottom: 0;
     }
     .f-brand { display: none !important; }
     .f-spacer { display: none !important; }
@@ -807,11 +806,9 @@
     </div>
   </footer>
 
-  </div><!-- /prayer-panel -->
-  </div><!-- /slide-wrap -->
-
   <!-- Next salah banner -->
-  <div id="mobile-banner" style="display:none">
+  <div style="padding-top:10px">
+  <div id="mobile-banner">
     <div class="mb-left">
       <div class="mb-label">Next Salah</div>
       <div class="mb-prayer" id="mb-prayer">—</div>
@@ -830,6 +827,10 @@
       <div class="mb-countdown" id="mb-countdown">--:--:--</div>
     </div>
   </div>
+  </div><!-- /banner wrapper -->
+
+  </div><!-- /prayer-panel -->
+  </div><!-- /slide-wrap -->
 
   <div id="mobile-iq-bar" style="display:none;width:0%"></div>
 
@@ -871,47 +872,57 @@ async function fetchSheet(tabName) {
   return json.table.rows.map(row => {
     const obj = {};
     row.c.forEach((cell, i) => {
-      obj[cols[i]] = cell ? (cell.f || cell.v) : null;
+      if (!cell) { obj[cols[i]] = null; return; }
+      // Prefer formatted string; fall back to raw value
+      let val = cell.f != null ? cell.f : cell.v;
+      // If raw value is a decimal fraction (gviz time type), convert to HH:MM
+      if (val == null && typeof cell.v === 'number' && cell.v > 0 && cell.v < 1) {
+        const totalMins = Math.round(cell.v * 24 * 60);
+        val = `${Math.floor(totalMins/60)}:${String(totalMins%60).padStart(2,'0')}`;
+      }
+      obj[cols[i]] = val;
     });
     return obj;
   });
 }
 
-// Sheet times are 12-hour without AM/PM (e.g. "1:30" = 13:30, "11:49" = 11:49).
-// Rule: if h < 7, it's PM (add 12). Fajr/Sunrise are always early so they're AM.
-// This covers UK prayer times year-round.
-function normTime(s) {
+// Convert sheet time string to 24h "H:MM" string given minimum expected hour
+function normTimeTo24(s, minHour) {
   if (!s) return '';
   s = String(s).trim();
-  if (/[AP]M/i.test(s)) return s; // already has AM/PM, leave as-is
+  // Strip seconds if present (e.g. "8:29:00")
+  s = s.replace(/^(\d+:\d+):\d+(\s*[AP]M)?$/i, (_, hm, ap) => ap ? `${hm}${ap}` : hm).trim();
+  if (/[AP]M/i.test(s)) {
+    const m = s.match(/^(\d+):(\d+)\s*([AP]M)$/i);
+    if (!m) return s;
+    let h = +m[1];
+    const ampm = m[3].toUpperCase();
+    if (ampm === 'PM' && h !== 12) h += 12;
+    if (ampm === 'AM' && h === 12) h = 0;
+    return `${h}:${m[2]}`;
+  }
   const m = s.match(/^(\d+):(\d+)$/);
   if (!m) return s;
-  let h = +m[1], min = m[2];
-  // If hour < 7, assume PM (afternoon/evening prayer)
-  if (h < 7) h += 12;
-  return `${h}:${min}`;
-}
-
-function normFajr(s) {
-  // Fajr/Sunrise are always morning — keep as-is (no +12)
-  return s ? String(s).trim() : '';
+  let h = +m[1];
+  if (h < minHour) h += 12;
+  return `${h}:${m[2]}`;
 }
 
 // Map a PrayerTimes sheet row to the internal tod/tom format
 function mapRow(row) {
   return {
-    fajr_begins:          normFajr(row['fajr_start']),
-    fajr_jamaah:          normFajr(row['fajr_congregation_start']),
-    zuhr_begins:          normTime(row['zuhr_start']),
-    zuhr_jamaah:          normTime(row['zuhr_congregation_start']),
-    asr_begins:           normTime(row['asr_first_start']),
-    asr_begins_secondary: normTime(row['asr_second_start']),
-    asr_jamaah:           normTime(row['asr_congregation_start']),
-    maghrib_begins:       normTime(row['maghrib_start']),
-    maghrib_jamaah:       normTime(row['maghrib_congregation_start']),
-    isha_begins:          normTime(row['isha_start']),
-    isha_jamaah:          normTime(row['isha_congregation_start']),
-    sunrise:              normFajr(row['sunrise_start']),
+    fajr_begins:          normTimeTo24(row['fajr_start'],              1),
+    fajr_jamaah:          normTimeTo24(row['fajr_congregation_start'], 1),
+    zuhr_begins:          normTimeTo24(row['zuhr_start'],              11),
+    zuhr_jamaah:          normTimeTo24(row['zuhr_congregation_start'], 11),
+    asr_begins:           normTimeTo24(row['asr_first_start'],         13),
+    asr_begins_secondary: normTimeTo24(row['asr_second_start'],        13),
+    asr_jamaah:           normTimeTo24(row['asr_congregation_start'],  13),
+    maghrib_begins:       normTimeTo24(row['maghrib_start'],           17),
+    maghrib_jamaah:       normTimeTo24(row['maghrib_congregation_start'], 17),
+    isha_begins:          normTimeTo24(row['isha_start'],              18),
+    isha_jamaah:          normTimeTo24(row['isha_congregation_start'], 18),
+    sunrise:              normTimeTo24(row['sunrise_start'],           1),
   };
 }
 
@@ -928,18 +939,20 @@ function findRow(rows, d) {
 function fmt(s) {
   if (!s) return '—';
   s = String(s).trim();
+  // Already has AM/PM
   if (/[AP]M/i.test(s)) return s.replace(/\s*([AP]M)/i, '\u2009$1');
   const parts = s.split(':');
   if (parts.length !== 2) return s;
   const h = +parts[0], m = +parts[1];
   if (isNaN(h) || isNaN(m)) return s;
-  // Display as 12-hour
+  // Convert 24h to 12h display (no AM/PM suffix)
   return `${h % 12 || 12}:${String(m).padStart(2, '0')}`;
 }
 
 function toMins(s) {
   if (!s) return null;
   s = s.trim();
+  // Handle AM/PM format
   const ap = s.match(/^(\d+):(\d+)\s*([AP]M)$/i);
   if (ap) {
     let h = +ap[1], ampm = ap[3].toUpperCase();
@@ -947,6 +960,7 @@ function toMins(s) {
     if (ampm === 'AM' && h === 12) h = 0;
     return h * 60 + +ap[2];
   }
+  // Handle plain H:MM or HH:MM (treated as 24h since mapRow normalises to 24h)
   const pl = s.match(/^(\d+):(\d+)$/);
   if (pl) return +pl[1] * 60 + +pl[2];
   return null;
@@ -1012,17 +1026,19 @@ function startClock() {
     const h12 = now.getHours() % 12 || 12;
     const mm  = String(now.getMinutes()).padStart(2, '0');
     const ap  = now.getHours() >= 12 ? 'PM' : 'AM';
-    clockEl.innerHTML = `${h12}<span class="clock-colon">:</span>${mm} ${ap}`;
-    var miTime = document.getElementById('mi-time');
-    var miAmpm = document.getElementById('mi-ampm');
+    if (clockEl) clockEl.innerHTML = `${h12}<span class="clock-colon">:</span>${mm} ${ap}`;
+    const miTime = document.getElementById('mi-time');
+    const miAmpm = document.getElementById('mi-ampm');
     if (miTime) miTime.textContent = `${h12}:${mm}`;
     if (miAmpm) miAmpm.textContent = ap;
-    var miHijri = document.getElementById('mi-hijri');
+    const miHijri = document.getElementById('mi-hijri');
     if (miHijri) miHijri.textContent = hijriDate(now);
-    gregEl.textContent  = ukDate(now);
-    const hd = hijriDate(now);
-    hijriEl.textContent = hd || '';
-    hijriEl.style.display = hd ? '' : 'none';
+    if (gregEl) gregEl.textContent = ukDate(now);
+    if (hijriEl) {
+      const hd = hijriDate(now);
+      hijriEl.textContent = hd || '';
+      hijriEl.style.display = hd ? '' : 'none';
+    }
   }
   tick();
   setInterval(tick, 1000);
@@ -1129,7 +1145,10 @@ function startActiveTracking(tod, tom) {
     let inBlackout = false, prayerName = '';
     for (const p of PNAMES) {
       const jM = toMins(tod[`${p}_jamaah`]);
-      if (jM !== null && nowM >= jM && nowM < jM + 10) {
+      if (jM === null) continue;
+      // Use a 30-minute window max, and only if jM is plausible for this prayer
+      const diff = nowM - jM;
+      if (diff >= 0 && diff < 12) {
         inBlackout = true;
         prayerName = PLABELS[p];
         break;
@@ -1143,7 +1162,7 @@ function startActiveTracking(tod, tom) {
     }
   }
   checkBlackout();
-  setInterval(checkBlackout, 10000);
+  setInterval(checkBlackout, 1000);
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
@@ -1161,7 +1180,8 @@ async function init() {
     const miInfo = document.getElementById('mobile-info');
     if (miName) miName.textContent = mosque.name || '';
     if (miAddr) miAddr.textContent = mosque.address || '';
-    if (miInfo) miInfo.style.display = 'flex';
+    // Only show top card on non-mobile (CSS hides it on mobile anyway, but don't override)
+    if (miInfo && window.innerWidth > 768) miInfo.style.display = 'flex';
 
     const logoWrap = document.getElementById('mi-logo-wrap');
     const logoImg  = document.getElementById('mi-logo');
@@ -1184,7 +1204,8 @@ async function init() {
     startActiveTracking(tod, tom);
 
     const midnight = new Date(); midnight.setHours(24, 0, 30, 0);
-    setTimeout(() => location.reload(), midnight - new Date());
+    const msToMidnight = midnight - new Date();
+    if (msToMidnight > 0) setTimeout(() => location.reload(), msToMidnight);
 
     loadEl.style.display = 'none';
     appEl.classList.add('visible');
@@ -1212,7 +1233,7 @@ async function init() {
       jummahTimes = jRows.filter(r => r['time']).map(r => {
         let label = r['label'] || "Jumu'ah";
         if (label.toLowerCase().includes('khutbah') || label.toLowerCase().includes('jummah')) label = "Jumu'ah";
-        return { label, time: r['time'] };
+        return { label, time: normTimeTo24(r['time'], 11) }; // Jumu'ah is always late morning/afternoon
       });
     } catch(e) { console.warn('JummahTimes fetch failed', e); }
 

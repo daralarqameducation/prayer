@@ -1572,7 +1572,7 @@ async function initEvents() {
     else if (score === 0)    dayLabel = 'Today';
     else if (score === 1)    dayLabel = 'Tomorrow';
     else                     dayLabel = ev.day;
-    return { ...ev, timeLabel: ev.time ? `${dayLabel} · ${fmtAmPm(normTimeTo24(ev.time, 11))}` : dayLabel };
+    return { ...ev, timeLabel: ev.time ? `${dayLabel} · ${fmtAmPm(normTimeTo24(ev.time, 0))}` : dayLabel };
   });
 
   // Determine how many items fit per page based on panel height

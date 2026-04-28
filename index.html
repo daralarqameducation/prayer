@@ -1389,6 +1389,47 @@ function startActiveTracking(tod, tom) {
       await initEvents(newClassRows);
     } catch(e) { console.warn('Classes auto-refresh failed', e); }
   }, 5 * 60 * 1000);
+
+  // Auto-refresh Jummah every 30 minutes
+  let _lastJummahHash = JSON.stringify(mosque.jummahRows);
+  setInterval(async () => {
+    try {
+      delete _sheetCache['JummahTimes'];
+      const jRows = await fetchSheet('JummahTimes');
+      const hash = JSON.stringify(jRows);
+      if (hash === _lastJummahHash) return;
+      _lastJummahHash = hash;
+      const newTimes = jRows.filter(r => r['time']).map(r => {
+        let label = r['label'] || "Jumu'ah";
+        if (label.toLowerCase().includes('khutbah') || label.toLowerCase().includes('jummah')) label = "Jumu'ah";
+        return { label, time: normTimeTo24(r['time'], 11) };
+      });
+      mosque.jummahRows = newTimes;
+      initJummahAnimator(mosque);
+    } catch(e) { console.warn('Jummah auto-refresh failed', e); }
+  }, 30 * 60 * 1000);
+
+  // Auto-refresh prayer times every 60 minutes
+  let _lastPrayerHash = JSON.stringify(tod);
+  setInterval(async () => {
+    try {
+      delete _sheetCache['PrayerTimes'];
+      const rows = await fetchSheet('PrayerTimes');
+      const hash = JSON.stringify(rows);
+      if (hash === _lastPrayerHash) return;
+      _lastPrayerHash = hash;
+      const today = new Date();
+      const tomorrow = new Date(); tomorrow.setDate(today.getDate() + 1);
+      const todRow = findRow(rows, today);
+      const tomRow = findRow(rows, tomorrow);
+      if (!todRow) return;
+      const newTod = mapRow(todRow);
+      const newTom = tomRow ? mapRow(tomRow) : null;
+      renderRows(newTod, newTom);
+      const sunriseEl = document.getElementById('sunrise');
+      if (newTod.sunrise && sunriseEl) sunriseEl.textContent = fmt(newTod.sunrise);
+    } catch(e) { console.warn('Prayer times auto-refresh failed', e); }
+  }, 60 * 60 * 1000);
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────────

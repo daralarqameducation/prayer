@@ -1512,6 +1512,30 @@ async function initEvents() {
   const dotsEl = document.getElementById('ev-dots');
   if (!list) return;
 
+  const now      = new Date();
+  const today    = new Date(); today.setHours(0,0,0,0);
+  const DAYS     = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const nowMinsTotal = now.getHours() * 60 + now.getMinutes();
+
+  function parseDate(s) {
+    if (!s) return null;
+    s = s.trim();
+    let m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (m) return new Date(+m[3], +m[2]-1, +m[1]);
+    m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (m) return new Date(+m[1], +m[2]-1, +m[3]);
+    return null;
+  }
+
+  function timeMins(t) {
+    if (!t) return 0;
+    const m = t.match(/(\d+):(\d+)/);
+    if (!m) return 0;
+    let h = +m[1], min = +m[2];
+    if (/pm/i.test(t) && h < 12) h += 12;
+    return h * 60 + min;
+  }
+
   let EVENTS = [];
   try {
     const rows = await fetchSheet('Classes');
@@ -1527,30 +1551,6 @@ async function initEvents() {
         desc:       (r['desc']       || '').trim(),
         tag:        (r['tag']        || 'Class').trim(),
       }));
-
-  function parseDate(s) {
-    if (!s) return null;
-    s = s.trim();
-    let m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-    if (m) return new Date(+m[3], +m[2]-1, +m[1]);
-    m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-    if (m) return new Date(+m[1], +m[2]-1, +m[3]);
-    return null;
-  }
-
-  const now      = new Date();
-  const today    = new Date(); today.setHours(0,0,0,0);
-  const DAYS     = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-  const nowMinsTotal = now.getHours() * 60 + now.getMinutes();
-
-  function timeMins(t) {
-    if (!t) return 0;
-    const m = t.match(/(\d+):(\d+)/);
-    if (!m) return 0;
-    let h = +m[1], min = +m[2];
-    if (/pm/i.test(t) && h < 12) h += 12;
-    return h * 60 + min;
-  }
 
   // Filter out courses that have ended (start_date + weeks * 7 days)
   EVENTS = EVENTS.filter(ev => {

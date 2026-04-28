@@ -666,7 +666,7 @@
   }
 
   @media (max-width: 768px) {
-    html { height: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    html { height: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch; font-size: 100%; }
     body { background: var(--bg2); overflow-y: auto; height: 100%; }
 
     #app {
@@ -694,22 +694,23 @@
       flex-shrink: 0;
       order: 1;
     }
-    #mobile-info .mi-name { font-size: 0.85rem !important; }
-    #mobile-info .mi-hijri { font-size: 0.62rem !important; }
-    #mobile-info .mi-clock { font-size: 1.2rem !important; }
-    #mobile-info .mi-logo { height: 30px !important; }
+    #mobile-info .mi-name { font-size: 1.1rem !important; }
+    #mobile-info .mi-hijri { font-size: 0.8rem !important; }
+    #mobile-info .mi-clock { font-size: 1.6rem !important; }
+    #mobile-info .mi-logo { height: 40px !important; }
     .prayer-row {
       flex: none !important;
-      padding: 4px 12px !important;
+      padding: 8px 14px !important;
       display: grid;
       grid-template-columns: 1.4fr 1fr 1fr 1fr;
       border-bottom: 1px solid var(--border);
       align-items: center;
+      line-height: 1.3;
     }
     #rows { display: flex; flex-direction: column; }
-    .p-name { font-size: 0.85rem !important; }
-    .p-begins, .p-tomorrow { font-size: 0.78rem !important; }
-    .p-jamaah { font-size: 0.82rem !important; }
+    .p-name { font-size: 1.1rem !important; line-height: 1.3 !important; }
+    .p-begins, .p-tomorrow { font-size: 0.95rem !important; line-height: 1.3 !important; }
+    .p-jamaah { font-size: 1rem !important; line-height: 1.3 !important; }
     .p-name-ar { display: none; }
 
     #slide-wrap { flex-direction: column; gap: 0; order: 2; display: flex; }
@@ -803,12 +804,12 @@
     .pg-header {
       display: grid;
       grid-template-columns: 1.4fr 1fr 1fr 1fr;
-      padding: 5px 14px;
+      padding: 3px 12px;
       border-bottom: 1px solid var(--border);
       margin-top: 0;
     }
     .pg-header span {
-      font-size: 0.58rem; font-weight: 700;
+      font-size: 0.72rem; font-weight: 700;
       letter-spacing: 0.08em; color: var(--text2);
       text-align: center; padding: 0;
     }
@@ -857,12 +858,12 @@
     .footer-row .f-cell { display: flex !important; flex-direction: column; gap: 4px; }
     .footer-row .f-cell:last-child { align-items: flex-end; text-align: right; }
     .footer-row .f-label {
-      font-size: 0.6rem !important; font-weight: 700;
+      font-size: 0.72rem !important; font-weight: 700;
       text-transform: uppercase; letter-spacing: 0.13em;
       color: var(--text2);
     }
     .footer-row .f-value {
-      font-size: 0.85rem !important; font-weight: 500;
+      font-size: 1rem !important; font-weight: 500;
       color: var(--gold);
     }
   }

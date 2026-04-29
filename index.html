@@ -780,19 +780,19 @@
 
     .pg-header {
       display: grid;
-      flex: 0 0 42px;
-      align-items: center;
-      padding: 4px 24px 0;
+      flex: 0 0 34px;
+      align-items: end;
+      padding: 0 24px 8px;
       border-bottom: 1px solid var(--border);
       margin-top: 0;
     }
     .pg-header span {
       padding: 0 !important;
       text-align: center;
-      font-size: 0.64rem;
+      font-size: 0.62rem;
       font-weight: 800;
-      letter-spacing: 0.06em;
-      color: var(--text2);
+      letter-spacing: 0.055em;
+      color: rgba(255,255,255,0.78);
     }
     .pg-header span:first-child {
       display: block;
@@ -1164,20 +1164,87 @@ function normTimeTo24(s, minHour) {
   return `${h}:${m[2]}`;
 }
 
+function rowValue(row, names) {
+  for (const name of names) {
+    const direct = row[name];
+    if (direct !== undefined) return direct;
+    const key = Object.keys(row).find(k => k.trim().toLowerCase() === name.toLowerCase());
+    if (key) return row[key];
+  }
+  return undefined;
+}
+
+function parseBlackoutRows(rows) {
+  const aliases = {
+    fajr: 'fajr',
+    fajar: 'fajr',
+    subh: 'fajr',
+    zuhr: 'zuhr',
+    dhuhr: 'zuhr',
+    asr: 'asr',
+    maghrib: 'maghrib',
+    isha: 'isha',
+    ishaa: 'isha',
+  };
+  return rows.reduce((settings, row) => {
+    const rawPrayer = rowValue(row, ['prayer', 'salah', 'name']);
+    const prayerKey = String(rawPrayer || '').trim().toLowerCase().replace(/[^a-z]/g, '');
+    const prayer = aliases[prayerKey];
+    if (!prayer) return settings;
+    const rawMins = rowValue(row, ['blackout_minutes', 'blackout_mins', 'minutes', 'mins', 'duration', 'blackout']);
+    if (rawMins === null || rawMins === undefined || String(rawMins).trim() === '') return settings;
+    const mins = Number(rawMins);
+    if (Number.isFinite(mins) && mins >= 0) settings[prayer] = mins;
+    return settings;
+  }, {});
+}
+
+async function fetchBlackoutSettings() {
+  try {
+    const rows = await fetchSheet('Blackout');
+    return parseBlackoutRows(rows);
+  } catch(e) {
+    console.warn('Blackout fetch failed', e);
+    return {};
+  }
+}
+
 // Map a PrayerTimes sheet row to the internal tod/tom format
-function mapRow(row) {
+function blackoutMins(row, prayer, blackoutSettings = {}, fallback = 12) {
+  if (Number.isFinite(blackoutSettings[prayer])) return blackoutSettings[prayer];
+  const keys = [
+    `${prayer}_blackout_minutes`,
+    `${prayer}_blackout_mins`,
+    `${prayer}_blackout_duration`,
+    `${prayer}_blackout`,
+  ];
+  for (const key of keys) {
+    const value = row[key];
+    if (value === null || value === undefined || String(value).trim() === '') continue;
+    const mins = Number(value);
+    return Number.isFinite(mins) && mins >= 0 ? mins : fallback;
+  }
+  return fallback;
+}
+
+function mapRow(row, blackoutSettings = {}) {
   return {
     fajr_begins:          normTimeTo24(row['fajr_start'],              1),
     fajr_jamaah:          normTimeTo24(row['fajr_congregation_start'], 1),
+    fajr_blackout_mins:   blackoutMins(row, 'fajr', blackoutSettings),
     zuhr_begins:          normTimeTo24(row['zuhr_start'],              11),
     zuhr_jamaah:          normTimeTo24(row['zuhr_congregation_start'], 11),
+    zuhr_blackout_mins:   blackoutMins(row, 'zuhr', blackoutSettings),
     asr_begins:           normTimeTo24(row['asr_first_start'],         13),
     asr_begins_secondary: normTimeTo24(row['asr_second_start'],        13),
     asr_jamaah:           normTimeTo24(row['asr_congregation_start'],  13),
+    asr_blackout_mins:    blackoutMins(row, 'asr', blackoutSettings),
     maghrib_begins:       normTimeTo24(row['maghrib_start'],           17),
     maghrib_jamaah:       normTimeTo24(row['maghrib_congregation_start'], 17),
+    maghrib_blackout_mins: blackoutMins(row, 'maghrib', blackoutSettings),
     isha_begins:          normTimeTo24(row['isha_start'],              18),
     isha_jamaah:          normTimeTo24(row['isha_congregation_start'], 18),
+    isha_blackout_mins:   blackoutMins(row, 'isha', blackoutSettings),
     sunrise:              normTimeTo24(row['sunrise_start'],           1),
   };
 }
@@ -1414,7 +1481,8 @@ function startActiveTracking(tod, tom, mosque) {
       const jM = toMins(tod[`${p}_jamaah`]);
       if (jM === null) continue;
       const diff = nowM - jM;
-      if (diff >= 0 && diff < 12) { inBlackout = true; prayerName = PLABELS[p]; break; }
+      const blackoutWindow = tod[`${p}_blackout_mins`] ?? 12;
+      if (blackoutWindow > 0 && diff >= 0 && diff < blackoutWindow) { inBlackout = true; prayerName = PLABELS[p]; break; }
     }
     if (inBlackout) {
       boPr.textContent = prayerName;
@@ -1487,8 +1555,12 @@ function startActiveTracking(tod, tom, mosque) {
       const todRow = findRow(rows, today);
       const tomRow = findRow(rows, tomorrow);
       if (!todRow) return;
-      const newTod = mapRow(todRow);
-      const newTom = tomRow ? mapRow(tomRow) : null;
+      delete _sheetCache['Blackout'];
+      const blackoutSettings = await fetchBlackoutSettings();
+      const newTod = mapRow(todRow, blackoutSettings);
+      const newTom = tomRow ? mapRow(tomRow, blackoutSettings) : null;
+      Object.assign(tod, newTod);
+      if (tom && newTom) Object.assign(tom, newTom);
       renderRows(newTod, newTom);
       const sunriseEl = document.getElementById('sunrise');
       if (newTod.sunrise && sunriseEl) sunriseEl.textContent = fmt(newTod.sunrise);
@@ -1565,8 +1637,9 @@ async function init() {
 
     if (!todRow) throw new Error(`No row found for today (${today.getMonth()+1}/${today.getDate()}). Check PrayerTimes tab.`);
 
-    const tod = mapRow(todRow);
-    const tom = tomRow ? mapRow(tomRow) : null;
+    const blackoutSettings = await fetchBlackoutSettings();
+    const tod = mapRow(todRow, blackoutSettings);
+    const tom = tomRow ? mapRow(tomRow, blackoutSettings) : null;
 
     // Fetch JummahTimes tab — build mosque object with all jummah times
     let jummahTimes = [];

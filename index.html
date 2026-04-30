@@ -27,8 +27,8 @@
     --text2:       rgba(255,255,255,0.75);
     --text3:       rgba(255,255,255,0.5);
     --muted:       rgba(255,255,255,0.65);
-    --border:      rgba(255,255,255,0.06);
-    --border2:     rgba(255,255,255,0.10);
+    --border:      rgba(255,255,255,0.035);
+    --border2:     rgba(255,255,255,0.06);
     --active-bg:   rgba(200,164,110,0.065);
   }
 
@@ -107,7 +107,7 @@
     align-items: center;
     gap: 16px;
     background: var(--bg);
-    border: 1px solid rgba(200,164,110,0.35);
+    border: 1px solid rgba(200,164,110,0.18);
     border-radius: 12px;
     padding: 8px 24px;
     margin-bottom: 6px;
@@ -267,7 +267,7 @@
     width: 32%;
     flex-shrink: 0;
     background: var(--bg);
-    border: 1px solid rgba(200,164,110,0.35);
+    border: 1px solid rgba(200,164,110,0.18);
     border-radius: 12px;
     overflow: hidden;
   }
@@ -296,7 +296,7 @@
   }
   .ev-footer {
     flex-shrink: 0;
-    border-top: 1px solid var(--border);
+    border-top: none;
     height: var(--footer-h, 56px);
     overflow: hidden;
     display: flex;
@@ -311,7 +311,7 @@
     display: flex;
     white-space: nowrap;
     animation: ticker 50s linear infinite;
-    font-size: clamp(0.75rem, 1.3vh, 1rem);
+    font-size: clamp(0.88rem, 1.6vh, 1.18rem);
     color: var(--text2);
     will-change: transform;
     transform: translateZ(0);
@@ -356,15 +356,15 @@
   .ev-item {
     display: flex;
     flex-direction: column;
-    padding: 12px 24px;
-    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    border-bottom: none;
     border-left: 3px solid transparent;
     gap: 3px;
     justify-content: center;
   }
   .ev-item-stretch {
     flex: 1;
-    padding: 0 24px;
+    padding: 0 16px;
   }
   .ev-item:last-child { border-bottom: none; }
   .ev-item-top {
@@ -419,7 +419,7 @@
     flex-direction: column;
     flex: 1;
     background: var(--bg);
-    border: 1px solid rgba(200,164,110,0.35);
+    border: 1px solid rgba(200,164,110,0.18);
     border-bottom: none;
     border-radius: 12px 12px 0 0;
     overflow: hidden;
@@ -440,9 +440,9 @@
     letter-spacing: 0.1em;
     color: var(--text2);
   }
-  .pg-header span:not(:first-child) { text-align: left; padding-left: clamp(8px,1.5vw,24px); }
-  .p-cell { text-align: left; padding-left: clamp(8px,1.5vw,24px); }
-  .p-jamaah-wrap { align-items: flex-start; padding-left: 0; }
+  .pg-header span:not(:first-child) { text-align: right; padding-left: 0; }
+  .p-cell { text-align: right; padding-left: 0; }
+  .p-jamaah-wrap { align-items: flex-end; padding-left: 0; }
 
   #rows { display: flex; flex-direction: column; flex: 1; }
 
@@ -450,7 +450,7 @@
     display: grid;
     grid-template-columns: 1.5fr 1fr 1fr 1fr;
     padding: 0 24px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: none;
     border-left: 3px solid transparent;
     align-items: center;
     flex: 1;
@@ -493,7 +493,7 @@
   }
   .prayer-row.active .p-name-ar { color: var(--gold); opacity: 0.55; }
 
-  .p-cell { text-align: left; padding-left: clamp(8px,1.5vw,24px); }
+  .p-cell { text-align: right; padding-left: 0; }
 
   .p-begins {
     font-size: clamp(1.1rem, 2.8vh, 2.4rem);
@@ -503,7 +503,7 @@
     font-variant-numeric: tabular-nums;
   }
 
-  .p-jamaah-wrap { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 0; }
+  .p-jamaah-wrap { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 0; }
   @media (max-width: 600px) { .p-jamaah-wrap { align-items: center; } }
   .p-jamaah {
     font-size: clamp(1.1rem, 2.8vh, 2.4rem);
@@ -527,6 +527,8 @@
     font-weight: 400;
     color: var(--text2);
     font-variant-numeric: tabular-nums;
+    text-align: right;
+    padding-left: 0;
   }
 
   /* ── FOOTER ── */
@@ -538,8 +540,8 @@
     align-items: center;
     gap: 12px;
     background: var(--bg);
-    border: 1px solid rgba(200,164,110,0.35);
-    border-top: 1px solid var(--border);
+    border: 1px solid rgba(200,164,110,0.18);
+    border-top: none;
     border-radius: 0 0 12px 12px;
     padding: 8px 24px;
   }
@@ -616,7 +618,7 @@
     align-items: center;
     justify-content: space-between;
     background: var(--bg);
-    border: 1px solid rgba(200,164,110,0.35);
+    border: 1px solid rgba(200,164,110,0.18);
     border-radius: 12px;
     padding: 16px 24px;
     margin-top: 4px;
@@ -723,7 +725,7 @@
       margin: 0 !important;
       padding: 8px 12px;
       background: var(--bg);
-      border: 1px solid rgba(200,164,110,0.35);
+      border: 1px solid rgba(200,164,110,0.18);
       border-radius: 12px;
     }
     #mobile-info .mi-logo { height: 42px !important; }
@@ -769,7 +771,7 @@
       flex-direction: column;
       overflow: hidden;
       background: var(--bg);
-      border: 1px solid rgba(200,164,110,0.35);
+      border: 1px solid rgba(200,164,110,0.18);
       border-bottom: none;
       border-radius: 12px 12px 0 0;
       padding: 16px 18px 0;
@@ -785,7 +787,7 @@
       flex: 0 0 auto;
       align-items: center;
       padding: 0 0 8px;
-      border-bottom: none;
+      border-bottom: 1px solid var(--border2);
       margin-top: 0;
     }
     .pg-header span {
@@ -796,6 +798,12 @@
       letter-spacing: 0.5px;
       color: var(--muted);
       text-transform: uppercase;
+    }
+    .pg-header span:not(:first-child) {
+      text-align: right;
+    }
+    .pg-header span:last-child {
+      text-align: right;
     }
     .pg-header span:first-child {
       display: block;
@@ -816,7 +824,7 @@
       min-height: 0;
       align-items: center;
       padding: 9px 0;
-      border-top: 1px solid var(--border);
+      border-top: none;
       border-bottom: none;
       line-height: 1.15;
     }
@@ -838,18 +846,18 @@
       font-size: 0.98rem !important;
       line-height: 1.1 !important;
       color: var(--text2);
-      text-align: center;
+      text-align: right;
     }
     .p-jamaah {
       font-size: 1.08rem !important;
       font-weight: 900;
       line-height: 1.1 !important;
-      text-align: center;
+      text-align: right;
     }
     .p-cell.p-jamaah-wrap {
       display: flex;
       min-height: 100%;
-      align-items: center;
+      align-items: flex-end;
       justify-content: center;
       padding: 0 !important;
     }
@@ -866,7 +874,7 @@
       justify-content: space-between;
       padding: 8px 14px;
       background: var(--bg);
-      border: 1px solid rgba(200,164,110,0.35);
+      border: 1px solid rgba(200,164,110,0.18);
       border-top: none;
       border-radius: 0 0 12px 12px;
     }
@@ -901,7 +909,7 @@
       margin: 6px 0 0;
       padding: 8px 14px;
       background: var(--bg);
-      border: 1px solid rgba(200,164,110,0.35);
+      border: 1px solid rgba(200,164,110,0.18);
       border-radius: 12px;
     }
     .mb-label {

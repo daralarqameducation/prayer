@@ -141,7 +141,8 @@
   .mi-ampm {
     font-size: clamp(0.7rem, 1.3vh, 1rem); font-weight: 600;
     margin-left: 2px; text-transform: uppercase; letter-spacing: 0.05em;
-    background: none; -webkit-text-fill-color: var(--muted);
+    background: none; -webkit-text-fill-color: var(--gold);
+    color: var(--gold);
   }
 
   /* ── SIDEBAR (hidden on desktop) ── */
@@ -477,7 +478,7 @@
 
   .p-name-wrap { display: flex; flex-direction: column; gap: 0.08em; }
   .p-name {
-    font-size: clamp(1.1rem, 2.8vh, 2.4rem);
+    font-size: clamp(1.15rem, 2.2vh, 1.8rem);
     font-weight: 700;
     letter-spacing: -0.01em;
     color: var(--text);
@@ -485,7 +486,7 @@
   }
   .prayer-row.active .p-name { color: var(--gold); }
   .p-name-ar {
-    font-size: clamp(0.58rem, 1.2vh, 1rem);
+    font-size: clamp(0.68rem, 1.35vh, 1.12rem);
     color: var(--text3);
     font-weight: 400;
     letter-spacing: 0.04em;
@@ -496,7 +497,7 @@
   .p-cell { text-align: right; padding-left: 0; }
 
   .p-begins {
-    font-size: clamp(1.1rem, 2.8vh, 2.4rem);
+    font-size: clamp(1.15rem, 2.2vh, 1.8rem);
     font-weight: 400;
     color: var(--text2);
     line-height: 1.45;
@@ -506,7 +507,7 @@
   .p-jamaah-wrap { display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 0; }
   @media (max-width: 600px) { .p-jamaah-wrap { align-items: center; } }
   .p-jamaah {
-    font-size: clamp(1.1rem, 2.8vh, 2.4rem);
+    font-size: clamp(1.15rem, 2.2vh, 1.8rem);
     font-weight: 700;
     letter-spacing: -0.01em;
     font-variant-numeric: tabular-nums;
@@ -523,7 +524,7 @@
   }
 
   .p-tomorrow {
-    font-size: clamp(1.1rem, 2.8vh, 2.4rem);
+    font-size: clamp(1.15rem, 2.2vh, 1.8rem);
     font-weight: 400;
     color: var(--text2);
     font-variant-numeric: tabular-nums;
@@ -555,11 +556,11 @@
     color: var(--text2);
   }
   .f-value {
-    font-size: clamp(1.1rem, 2.8vh, 2.4rem);
+    font-size: clamp(1.15rem, 2.2vh, 1.8rem);
     font-weight: 400;
     letter-spacing: -0.025em;
     font-variant-numeric: tabular-nums;
-    color: var(--gold);
+    color: var(--text3);
   }
   .brand {
     font-size: clamp(0.72rem,1.2vw,1.05rem);
@@ -666,8 +667,8 @@
   @media (min-width: 768px) and (max-width: 1180px) {
     #app { padding: clamp(6px, 1vw, 12px); }
     #events-panel { width: 30%; }
-    .p-name { font-size: clamp(1rem, 2.4vh, 2rem) !important; }
-    .p-begins, .p-jamaah, .p-tomorrow { font-size: clamp(0.95rem, 2.2vh, 1.8rem) !important; }
+    .p-name { font-size: clamp(1.15rem, 2.2vh, 1.8rem) !important; }
+    .p-begins, .p-jamaah, .p-tomorrow { font-size: clamp(1.15rem, 2.2vh, 1.8rem) !important; }
     .mi-clock { font-size: clamp(1.4rem, 3vh, 2.4rem) !important; }
     .mi-name { font-size: clamp(1rem, 1.8vh, 1.4rem) !important; }
     .mi-hijri { font-size: clamp(0.65rem, 1.2vh, 0.9rem) !important; }
@@ -835,21 +836,21 @@
     }
     .p-name-wrap { gap: 0; }
     .p-name {
-      font-size: 1.12rem !important;
+      font-size: 1.08rem !important;
       font-weight: 800;
       line-height: 1.1 !important;
       text-align: left;
     }
     .p-name-ar {
       display: block !important;
-      font-size: 0.62rem !important;
+      font-size: 0.72rem !important;
       line-height: 1.1 !important;
       text-align: left;
       opacity: 0.58;
     }
     .p-begins,
     .p-tomorrow {
-      font-size: 0.98rem !important;
+      font-size: 1.08rem !important;
       line-height: 1.1 !important;
     color: var(--text3);
       text-align: right;
@@ -1564,10 +1565,13 @@ function startActiveTracking(tod, tom, mosque) {
   function checkBlackout() {
     const now  = new Date();
     const nowM = now.getHours() * 60 + now.getMinutes();
+    const isFriday = now.getDay() === 5;
+    const hasJummah = (mosque.jummahRows || []).some(r => r.time);
     const bo   = document.getElementById('blackout');
     const boPr = document.getElementById('bo-prayer');
     let inBlackout = false, prayerName = '';
     for (const p of PNAMES) {
+      if (isFriday && hasJummah && p === 'zuhr') continue;
       const jM = toMins(tod[`${p}_jamaah`]);
       if (jM === null) continue;
       const diff = nowM - jM;

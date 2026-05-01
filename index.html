@@ -1031,7 +1031,7 @@
   <!-- Events & Classes Panel -->
   <div id="events-panel">
     <div class="ev-header">
-      <span>Classes &amp; Events</span>
+      <span>Announcements</span>
       <div class="ev-dots" id="ev-dots"></div>
     </div>
     <div class="ev-list" id="ev-list">
@@ -1221,6 +1221,29 @@ async function fetchBlackoutSettings() {
   }
 }
 
+async function fetchFridayReminders() {
+  try {
+    const rows = await fetchSheet('FridayReminders');
+    return rows
+      .filter(r => {
+        const active = rowValue(r, ['active']);
+        return active === true || String(active).trim().toLowerCase() === 'true';
+      })
+      .sort((a, b) => Number(rowValue(a, ['order']) || 0) - Number(rowValue(b, ['order']) || 0))
+      .map(r => ({
+        timeLabel: 'Friday reminder',
+        title: String(rowValue(r, ['title']) || '').trim(),
+        desc: String(rowValue(r, ['desc', 'message']) || '').trim(),
+        tag: 'Reminder',
+        reminder: true,
+      }))
+      .filter(r => r.title);
+  } catch(e) {
+    console.warn('FridayReminders fetch failed', e);
+    return [];
+  }
+}
+
 // Map a PrayerTimes sheet row to the internal tod/tom format
 function blackoutMins(row, prayer, blackoutSettings = {}, fallback = 12) {
   if (Number.isFinite(blackoutSettings[prayer])) return blackoutSettings[prayer];
@@ -1265,6 +1288,23 @@ function findRow(rows, d) {
   const m = d.getMonth() + 1;
   const day = d.getDate();
   return rows.find(r => Number(r['month']) === m && Number(r['day_of_month']) === day);
+}
+
+function scheduleFridayReminderBoundaryRefresh(tod) {
+  const now = new Date();
+  const day = now.getDay();
+  if (day !== 4 && day !== 5) return;
+
+  const maghribMins = toMins(tod?.maghrib_begins);
+  if (maghribMins === null) return;
+
+  const refreshAt = new Date(now);
+  refreshAt.setHours(Math.floor(maghribMins / 60), maghribMins % 60, 5, 0);
+  const delay = refreshAt - now;
+
+  if (delay > 0) {
+    setTimeout(() => location.reload(), delay);
+  }
 }
 
 
@@ -1521,8 +1561,11 @@ function startActiveTracking(tod, tom, mosque) {
   setInterval(async () => {
     try {
       delete _sheetCache['Classes'];
+      delete _sheetCache['FridayReminders'];
       const newClassRows = await fetchSheet('Classes');
-      const hash = JSON.stringify(newClassRows);
+      let newReminderRows = [];
+      try { newReminderRows = await fetchSheet('FridayReminders'); } catch(e) {}
+      const hash = JSON.stringify({ classes: newClassRows, fridayReminders: newReminderRows });
       if (hash === _lastClassHash) return;
       _lastClassHash = hash;
       window._lastClassHash = hash;
@@ -1530,7 +1573,7 @@ function startActiveTracking(tod, tom, mosque) {
       const evDots = document.getElementById('ev-dots');
       if (evList) evList.innerHTML = '';
       if (evDots) evDots.innerHTML = '';
-      await initEvents(newClassRows);
+      await initEvents(newClassRows, tod, tom);
     } catch(e) { console.warn('Classes auto-refresh failed', e); }
   }, 5 * 60 * 1000);
 
@@ -1615,7 +1658,7 @@ async function init() {
 
     renderRows(tod, tom);
     initJummahAnimator(mosque);
-    await initEvents();
+    await initEvents(null, tod, tom);
     // Set initial hash for change detection
     try {
       const initialRows = await fetchSheet('Classes');
@@ -1632,6 +1675,7 @@ async function init() {
     const midnight = new Date(); midnight.setHours(24, 0, 30, 0);
     const msToMidnight = midnight - new Date();
     if (msToMidnight > 0) setTimeout(() => location.reload(), msToMidnight);
+    scheduleFridayReminderBoundaryRefresh(tod);
 
     loadEl.style.display = 'none';
     appEl.classList.add('visible');
@@ -1707,7 +1751,7 @@ function initJummahAnimator(mosque) {
 }
 
 // ── EVENTS PAGINATION ─────────────────────────────────────────────────────────
-async function initEvents() {
+async function initEvents(existingRows = null, tod = null, tom = null) {
   const list   = document.getElementById('ev-list');
   const dotsEl = document.getElementById('ev-dots');
   if (!list) return;
@@ -1738,7 +1782,7 @@ async function initEvents() {
 
   let EVENTS = [];
   try {
-    const rows = await fetchSheet('Classes');
+    const rows = existingRows || await fetchSheet('Classes');
     console.log('Classes rows:', JSON.stringify(rows.slice(0,3)));
     EVENTS = rows
       .filter(r => r['title'] && r['title'].toLowerCase() !== 'title')
@@ -1764,8 +1808,6 @@ async function initEvents() {
     console.error('Classes fetch failed:', e);
     return;
   }
-
-  if (!EVENTS.length) return;
 
   const todayIdx = now.getDay();
 
@@ -1828,6 +1870,17 @@ async function initEvents() {
     return { ...ev, isNew, timeLabel: ev.time ? `${dayLabel} · ${fmtAmPm(normTimeTo24(ev.time, 0))}` : dayLabel };
   });
 
+  const todayMaghrib = toMins(tod?.maghrib_begins);
+  const inFridayReminderWindow =
+    (todayIdx === 4 && todayMaghrib !== null && nowMinsTotal >= todayMaghrib) ||
+    (todayIdx === 5 && (todayMaghrib === null || nowMinsTotal < todayMaghrib));
+
+  if (inFridayReminderWindow) {
+    const fridayReminders = await fetchFridayReminders();
+    if (fridayReminders.length) EVENTS = [...fridayReminders, ...EVENTS];
+  }
+  if (!EVENTS.length) return;
+
   // Determine how many items fit per page based on panel height
   const ITEMS_PER_PAGE = 5;
   const pages = [];
@@ -1846,7 +1899,7 @@ async function initEvents() {
         <div class="ev-item${full ? ' ev-item-stretch' : ''}">
           <div class="ev-item-top">
             <div class="ev-time">${ev.timeLabel}</div>
-            <div class="ev-tag${ev.tag.toLowerCase() === 'online' ? ' ev-tag-online' : ''}">${ev.tag.charAt(0).toUpperCase() + ev.tag.slice(1).toLowerCase()}</div>
+            ${ev.reminder ? '' : `<div class="ev-tag${ev.tag.toLowerCase() === 'online' ? ' ev-tag-online' : ''}">${ev.tag.toLowerCase() === 'class' ? 'Onsite' : ev.tag.charAt(0).toUpperCase() + ev.tag.slice(1).toLowerCase()}</div>`}
           </div>
           <div class="ev-title">${ev.title}</div>
           <div class="ev-desc">${ev.desc}</div>
@@ -1884,7 +1937,7 @@ async function initEvents() {
 
   setInterval(() => {
     goTo((current + 1) % pages.length);
-  }, 15000);
+  }, 30000);
 }
 
 

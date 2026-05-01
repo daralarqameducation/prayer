@@ -123,7 +123,7 @@
     display: none;
   }
   .mi-hijri {
-    font-size: clamp(0.85rem, 1.55vh, 1.2rem); color: var(--gold);
+    font-size: clamp(1rem, 1.8vh, 1.35rem); color: var(--gold);
     opacity: 0.85; margin-top: 4px; line-height: 1.4;
   }
   .mi-divider {
@@ -735,7 +735,7 @@
       line-height: 1.05;
     }
     #mobile-info .mi-hijri {
-      font-size: 0.84rem !important;
+      font-size: 0.94rem !important;
       line-height: 1.2;
       margin-top: 4px;
     }
@@ -946,7 +946,7 @@
     }
     #mobile-info .mi-logo { height: 36px !important; }
     #mobile-info .mi-name { font-size: 1rem !important; }
-    #mobile-info .mi-hijri { font-size: 0.68rem !important; }
+    #mobile-info .mi-hijri { font-size: 0.76rem !important; }
     #mobile-info .mi-clock { font-size: 1.45rem !important; }
     .pg-header { flex-basis: 24px; }
     .p-name { font-size: 1.02rem !important; }
@@ -1360,7 +1360,14 @@ function toMins(s) {
 }
 
 function ukDate(d) {
-  return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const day = d.getDate();
+  const suffix = day % 10 === 1 && day !== 11 ? 'st'
+    : day % 10 === 2 && day !== 12 ? 'nd'
+    : day % 10 === 3 && day !== 13 ? 'rd'
+    : 'th';
+  const weekday = d.toLocaleDateString('en-GB', { weekday: 'long' });
+  const month = d.toLocaleDateString('en-GB', { month: 'long' });
+  return `${weekday}, ${day}${suffix} ${month} ${d.getFullYear()}`;
 }
 
 function hijriDate(d) {
@@ -1417,6 +1424,7 @@ function startClock() {
   const clockEl = document.getElementById('clock');
   const gregEl  = document.getElementById('date-gregorian');
   const hijriEl = document.getElementById('date-hijri');
+  const startTime = Date.now();
 
   function tick() {
     const now = new Date();
@@ -1429,7 +1437,10 @@ function startClock() {
     if (miTime) miTime.textContent = `${h12}:${mm}`;
     if (miAmpm) miAmpm.textContent = ap;
     const miHijri = document.getElementById('mi-hijri');
-    if (miHijri) miHijri.textContent = hijriDate(now);
+    if (miHijri) {
+      const showUkDate = Math.floor((Date.now() - startTime) / 30000) % 2 === 1;
+      miHijri.textContent = showUkDate ? ukDate(now) : hijriDate(now);
+    }
     if (gregEl) gregEl.textContent = ukDate(now);
     if (hijriEl) {
       const hd = hijriDate(now);

@@ -439,11 +439,10 @@
   }
   #prayer-card-wrap,
   #content-window {
-    transition: opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1), transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: opacity 1.2s ease;
   }
   #prayer-panel.show-content #prayer-card-wrap {
     opacity: 0;
-    transform: translateY(-6px);
     pointer-events: none;
   }
   #content-window {
@@ -457,13 +456,11 @@
     border-radius: 12px;
     padding: clamp(28px, 4vw, 72px);
     opacity: 0;
-    transform: translateY(6px);
     pointer-events: none;
     overflow: hidden;
   }
   #prayer-panel.show-content #content-window {
     opacity: 1;
-    transform: translateY(0);
     pointer-events: auto;
   }
   .cw-kicker {

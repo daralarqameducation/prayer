@@ -428,6 +428,92 @@
     padding: 0;
     margin-bottom: 0;
   }
+  #prayer-panel {
+    position: relative;
+  }
+  #prayer-card-wrap {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    flex-direction: column;
+  }
+  #prayer-card-wrap,
+  #content-window {
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  #prayer-panel.show-content #prayer-card-wrap {
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+  }
+  #content-window {
+    position: absolute;
+    inset: 0 0 calc(var(--banner-h, 74px) + 4px) 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: var(--bg);
+    border: 1px solid rgba(200,164,110,0.18);
+    border-radius: 12px;
+    padding: clamp(28px, 4vw, 72px);
+    opacity: 0;
+    transform: translateY(6px);
+    pointer-events: none;
+    overflow: hidden;
+  }
+  #prayer-panel.show-content #content-window {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .cw-kicker {
+    font-size: clamp(0.85rem, 1.6vh, 1.2rem);
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: clamp(10px, 1.4vw, 22px);
+  }
+  .cw-title {
+    max-width: 900px;
+    font-size: clamp(1.55rem, 3.2vh, 3.1rem);
+    font-weight: 600;
+    line-height: 1.18;
+    color: var(--text);
+    letter-spacing: 0;
+  }
+  .cw-desc {
+    max-width: 900px;
+    margin-top: clamp(16px, 2vw, 30px);
+    font-size: clamp(1rem, 2vh, 1.55rem);
+    line-height: 1.45;
+    color: var(--text2);
+  }
+  .cw-source {
+    margin-top: clamp(16px, 2vw, 28px);
+    font-size: clamp(0.8rem, 1.5vh, 1.1rem);
+    color: var(--gold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .cw-meta {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: clamp(22px, 3vw, 44px);
+  }
+  .cw-pill {
+    border: 1px solid rgba(200,164,110,0.24);
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: var(--gold);
+    font-size: clamp(0.8rem, 1.5vh, 1.1rem);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: rgba(200,164,110,0.08);
+  }
 
   .pg-header {
     display: grid;
@@ -764,6 +850,14 @@
       min-height: 0;
       flex-direction: column;
     }
+    #content-window {
+      display: none !important;
+    }
+    #prayer-panel.show-content #prayer-card-wrap {
+      opacity: 1;
+      transform: none;
+      pointer-events: auto;
+    }
 
     .main {
       display: flex;
@@ -1055,6 +1149,7 @@
   </div>
 
   <div id="prayer-panel">
+  <div id="prayer-card-wrap">
   <!-- Prayer grid -->
   <main class="main">
     <div class="pg-header">
@@ -1078,6 +1173,18 @@
       <div class="f-value" id="jummah-wrap">—</div>
     </div>
   </footer>
+  </div>
+
+  <section id="content-window" aria-hidden="true">
+    <div class="cw-kicker" id="cw-kicker">Hadith of the Day</div>
+    <div class="cw-title" id="cw-title">The best among you are those who learn the Qur’an and teach it.</div>
+    <div class="cw-desc" id="cw-desc">A reminder to keep our homes connected to recitation, learning and practice.</div>
+    <div class="cw-source" id="cw-source">Sahih al-Bukhari</div>
+    <div class="cw-meta">
+      <span class="cw-pill" id="cw-pill-1">Daily reminder</span>
+      <span class="cw-pill" id="cw-pill-2">Qur’an</span>
+    </div>
+  </section>
 
   <!-- Next salah banner -->
   <div id="mobile-banner">
@@ -1252,6 +1359,40 @@ async function fetchFridayReminders() {
   }
 }
 
+async function fetchContentSlides(tod) {
+  const fridayWindow = isFridayReminderWindow(tod);
+  try {
+    const rows = await fetchSheet('Content');
+    return rows
+      .filter(r => {
+        const active = rowValue(r, ['active']);
+        return active === true || String(active).trim().toLowerCase() === 'true';
+      })
+      .filter(r => {
+        const type = String(rowValue(r, ['type']) || 'daily').trim().toLowerCase();
+        if (type === 'friday') return fridayWindow;
+        if (type === 'daily') return !fridayWindow;
+        return true;
+      })
+      .sort((a, b) => Number(rowValue(a, ['order']) || 0) - Number(rowValue(b, ['order']) || 0))
+      .map(r => {
+        const type = String(rowValue(r, ['type']) || 'daily').trim().toLowerCase();
+        return {
+          kicker: type === 'friday' ? 'Friday Hadith' : type === 'poster' ? 'Announcement' : 'Hadith of the Day',
+          title: String(rowValue(r, ['title']) || '').trim(),
+          desc: String(rowValue(r, ['desc', 'message']) || '').trim(),
+          source: String(rowValue(r, ['source']) || '').trim(),
+          pill1: String(rowValue(r, ['pill_1', 'pill1']) || '').trim(),
+          pill2: String(rowValue(r, ['pill_2', 'pill2']) || '').trim(),
+        };
+      })
+      .filter(slide => slide.title);
+  } catch(e) {
+    console.warn('Content fetch failed', e);
+    return [];
+  }
+}
+
 // Map a PrayerTimes sheet row to the internal tod/tom format
 function blackoutMins(row, prayer, blackoutSettings = {}, fallback = 12) {
   if (Number.isFinite(blackoutSettings[prayer])) return blackoutSettings[prayer];
@@ -1296,6 +1437,15 @@ function findRow(rows, d) {
   const m = d.getMonth() + 1;
   const day = d.getDate();
   return rows.find(r => Number(r['month']) === m && Number(r['day_of_month']) === day);
+}
+
+function isFridayReminderWindow(tod) {
+  const now = new Date();
+  const day = now.getDay();
+  const maghribMins = toMins(tod?.maghrib_begins);
+  const nowMins = now.getHours() * 60 + now.getMinutes();
+  return (day === 4 && maghribMins !== null && nowMins >= maghribMins) ||
+    (day === 5 && (maghribMins === null || nowMins < maghribMins));
 }
 
 function scheduleFridayReminderBoundaryRefresh(tod) {
@@ -1616,6 +1766,7 @@ function startActiveTracking(tod, tom, mosque) {
     try {
       delete _sheetCache['Classes'];
       delete _sheetCache['FridayReminders'];
+      delete _sheetCache['Content'];
       const newClassRows = await fetchSheet('Classes');
       let newReminderRows = [];
       try { newReminderRows = await fetchSheet('FridayReminders'); } catch(e) {}
@@ -1677,6 +1828,51 @@ function startActiveTracking(tod, tom, mosque) {
   }, 60 * 60 * 1000);
 }
 
+async function loadContentWindowSlides(tod) {
+  return fetchContentSlides(tod);
+}
+
+function setContentWindowSlide(content) {
+  const setText = (id, text) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.textContent = text;
+      el.style.display = text ? '' : 'none';
+    }
+  };
+  setText('cw-kicker', content.kicker);
+  setText('cw-title', content.title);
+  setText('cw-desc', content.desc);
+  setText('cw-source', content.source);
+  setText('cw-pill-1', content.pill1);
+  setText('cw-pill-2', content.pill2);
+}
+
+async function startContentWindowRotation(tod) {
+  const panel = document.getElementById('prayer-panel');
+  const content = document.getElementById('content-window');
+  if (!panel || !content || window.innerWidth <= 600) return;
+  const slides = await loadContentWindowSlides(tod);
+  if (!slides.length) {
+    panel.classList.remove('show-content');
+    content.setAttribute('aria-hidden', 'true');
+    return;
+  }
+  let slideIndex = 0;
+  setContentWindowSlide(slides[slideIndex]);
+
+  let showingContent = false;
+  setInterval(() => {
+    showingContent = !showingContent;
+    if (showingContent) {
+      setContentWindowSlide(slides[slideIndex]);
+      slideIndex = (slideIndex + 1) % slides.length;
+    }
+    panel.classList.toggle('show-content', showingContent);
+    content.setAttribute('aria-hidden', showingContent ? 'false' : 'true');
+  }, 30000);
+}
+
 // ── INIT ──────────────────────────────────────────────────────────────────────
 async function init() {
   const loadEl = document.getElementById('loading');
@@ -1723,13 +1919,16 @@ async function init() {
 
     requestAnimationFrame(() => {
       const footer = document.querySelector('.footer-row');
+      const banner = document.getElementById('mobile-banner');
       if (footer) document.documentElement.style.setProperty('--footer-h', footer.offsetHeight + 'px');
+      if (banner) document.documentElement.style.setProperty('--banner-h', banner.offsetHeight + 'px');
     });
 
     const midnight = new Date(); midnight.setHours(24, 0, 30, 0);
     const msToMidnight = midnight - new Date();
     if (msToMidnight > 0) setTimeout(() => location.reload(), msToMidnight);
     scheduleFridayReminderBoundaryRefresh(tod);
+    startContentWindowRotation(tod);
 
     loadEl.style.display = 'none';
     appEl.classList.add('visible');
@@ -1924,12 +2123,7 @@ async function initEvents(existingRows = null, tod = null, tom = null) {
     return { ...ev, isNew, timeLabel: ev.time ? `${dayLabel} · ${fmtAmPm(normTimeTo24(ev.time, 0))}` : dayLabel };
   });
 
-  const todayMaghrib = toMins(tod?.maghrib_begins);
-  const inFridayReminderWindow =
-    (todayIdx === 4 && todayMaghrib !== null && nowMinsTotal >= todayMaghrib) ||
-    (todayIdx === 5 && (todayMaghrib === null || nowMinsTotal < todayMaghrib));
-
-  if (inFridayReminderWindow) {
+  if (isFridayReminderWindow(tod)) {
     const fridayReminders = await fetchFridayReminders();
     if (fridayReminders.length) EVENTS = [...fridayReminders, ...EVENTS];
   }

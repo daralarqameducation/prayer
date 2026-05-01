@@ -115,7 +115,7 @@
   }
   .mi-mosque { min-width: 0; flex: 1; }
   .mi-name {
-    font-size: clamp(1.1rem, 2.2vh, 1.8rem); font-weight: 600;
+    font-size: clamp(1.22rem, 2.5vh, 2rem); font-weight: 600;
     color: var(--text); line-height: 1.2;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
@@ -123,7 +123,7 @@
     display: none;
   }
   .mi-hijri {
-    font-size: clamp(0.75rem, 1.4vh, 1.1rem); color: var(--gold);
+    font-size: clamp(0.85rem, 1.55vh, 1.2rem); color: var(--gold);
     opacity: 0.85; margin-top: 4px; line-height: 1.4;
   }
   .mi-divider {
@@ -183,7 +183,7 @@
   #date-hijri {
     font-size: clamp(0.6rem,1.05vw,0.95rem);
     font-weight: 400;
-    color: var(--gold);
+    color: var(--text2);
     opacity: 0.75;
     margin-top: 0.2em;
     letter-spacing: 0.01em;
@@ -264,7 +264,7 @@
   #events-panel {
     display: flex;
     flex-direction: column;
-    width: 32%;
+    width: 36%;
     flex-shrink: 0;
     background: var(--bg);
     border: 1px solid rgba(200,164,110,0.18);
@@ -556,7 +556,7 @@
   }
   .f-value {
     font-size: clamp(1.1rem, 2.8vh, 2.4rem);
-    font-weight: 500;
+    font-weight: 400;
     letter-spacing: -0.025em;
     font-variant-numeric: tabular-nums;
     color: var(--gold);
@@ -707,7 +707,6 @@
 
     .sidebar,
     #events-panel,
-    .p-name-ar,
     .pg-label,
     .mb-center,
     .f-brand,
@@ -730,12 +729,12 @@
     }
     #mobile-info .mi-logo { height: 42px !important; }
     #mobile-info .mi-name {
-      font-size: 1.12rem !important;
+      font-size: 1.22rem !important;
       font-weight: 600;
       line-height: 1.05;
     }
     #mobile-info .mi-hijri {
-      font-size: 0.78rem !important;
+      font-size: 0.84rem !important;
       line-height: 1.2;
       margin-top: 4px;
     }
@@ -841,11 +840,18 @@
       line-height: 1.1 !important;
       text-align: left;
     }
+    .p-name-ar {
+      display: block !important;
+      font-size: 0.62rem !important;
+      line-height: 1.1 !important;
+      text-align: left;
+      opacity: 0.58;
+    }
     .p-begins,
     .p-tomorrow {
       font-size: 0.98rem !important;
       line-height: 1.1 !important;
-      color: var(--text2);
+    color: var(--text3);
       text-align: right;
     }
     .p-jamaah {
@@ -896,9 +902,9 @@
     }
     .footer-row .f-value {
       font-size: 1.1rem !important;
-      font-weight: 700;
+      font-weight: 500;
       line-height: 1;
-      color: var(--gold);
+      color: var(--text3);
     }
 
     #mobile-banner {
@@ -1050,7 +1056,7 @@
   <!-- Prayer grid -->
   <main class="main">
     <div class="pg-header">
-      <span></span>
+      <span>Prayer</span>
       <span>Begins</span>
       <span>Jama'ah</span>
       <span>Tomorrow</span>
@@ -1366,6 +1372,7 @@ function hijriDate(d) {
 function renderRows(tod, tom) {
   const cont = document.getElementById('rows');
   cont.innerHTML = '';
+  const isFriday = new Date().getDay() === 5;
   PNAMES.forEach(p => {
     const begins  = tod[`${p}_begins`] || '';
     const begins2 = tod[`${p}_begins_secondary`] || null;
@@ -1387,9 +1394,12 @@ function renderRows(tod, tom) {
     row.dataset.p      = p;
     row.dataset.begins = begins;
     row.dataset.jamaah = jamaah || '';
+    const prayerLabel = isFriday && p === 'zuhr' ? "Jumu'ah" : PLABELS[p];
+    const prayerArabic = isFriday && p === 'zuhr' ? 'الجمعة' : ARABIC[p];
     row.innerHTML = `
       <div class="p-name-wrap">
-        <div class="p-name">${PLABELS[p]}</div>
+        <div class="p-name">${prayerLabel}</div>
+        <div class="p-name-ar">${prayerArabic}</div>
       </div>
       <div class="p-cell p-begins">${beginsHtml}</div>
       <div class="p-cell p-jamaah-wrap">
@@ -1432,13 +1442,29 @@ function startClock() {
 
 // ── ACTIVE ROW + IQAMAH BARS ──────────────────────────────────────────────────
 function startActiveTracking(tod, tom, mosque) {
+  function nextJummahSecondsAfter(nowS) {
+    const times = (mosque.jummahRows || [])
+      .map(r => toMins(r.time))
+      .filter(m => m !== null)
+      .sort((a, b) => a - b);
+    const next = times.find(m => m * 60 > nowS);
+    return next !== undefined ? next * 60 : null;
+  }
+
   function tick() {
     const now  = new Date();
     const nowS = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
     const nowM = now.getHours() * 60 + now.getMinutes();
+    const isFriday = now.getDay() === 5;
+    const hasJummah = (mosque.jummahRows || []).some(r => r.time);
 
     let nextJamaahM = null, nextPrayer = null;
+    const nextJummahS = isFriday && hasJummah ? nextJummahSecondsAfter(nowS) : null;
+    if (nextJummahS !== null) nextPrayer = 'jummah';
+
     for (const p of PNAMES) {
+      if (nextPrayer) break;
+      if (isFriday && hasJummah && p === 'zuhr') continue;
       const jM = toMins(tod[`${p}_jamaah`]);
       if (jM !== null && jM > nowM) { nextJamaahM = jM; nextPrayer = p; break; }
     }
@@ -1458,7 +1484,7 @@ function startActiveTracking(tod, tom, mosque) {
       const jM = toMins(tod[`${p}_jamaah`]);
       const inWindow = bM !== null && jM !== null && nowM >= bM && nowM < jM;
 
-      row.classList.toggle('active', p === nextPrayer || inWindow);
+      row.classList.toggle('active', p === nextPrayer || (nextPrayer === 'jummah' && p === 'zuhr') || inWindow);
       row.classList.toggle('in-window', inWindow);
 
       if (inWindow && barW && barI && label) {
@@ -1485,9 +1511,21 @@ function startActiveTracking(tod, tom, mosque) {
 
     const now   = new Date();
     const nowS  = now.getHours()*3600 + now.getMinutes()*60 + now.getSeconds();
+    const isFriday = now.getDay() === 5;
+    const hasJummah = (mosque.jummahRows || []).some(r => r.time);
     let target = null, nextP = null, beginsS = null;
 
+    const nextJummahS = isFriday && hasJummah ? nextJummahSecondsAfter(nowS) : null;
+    if (nextJummahS !== null) {
+      target = nextJummahS;
+      nextP = 'jummah';
+      const bM = toMins(tod.zuhr_begins);
+      beginsS = bM !== null ? bM * 60 : null;
+    }
+
     for (const p of PNAMES) {
+      if (target) break;
+      if (isFriday && hasJummah && p === 'zuhr') continue;
       const jM = toMins(tod[p+'_jamaah']);
       const bM = toMins(tod[p+'_begins']);
       if (jM !== null && jM*60 > nowS) {
@@ -1504,7 +1542,7 @@ function startActiveTracking(tod, tom, mosque) {
 
     if (!nextP) return;
 
-    document.getElementById('mb-prayer').textContent = PLABELS[nextP] || nextP;
+    document.getElementById('mb-prayer').textContent = nextP === 'jummah' ? "Jumu'ah" : (PLABELS[nextP] || nextP);
 
     const diff = Math.max(0, target - nowS);
     const hh = Math.floor(diff/3600);

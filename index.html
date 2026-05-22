@@ -44,7 +44,7 @@
     text-rendering: optimizeLegibility;
   }
 
-  /* ── LOADING ── */
+  /* ‚îÄ‚îÄ LOADING ‚îÄ‚îÄ */
   #loading {
     position: fixed; inset: 0;
     display: flex; align-items: center; justify-content: center;
@@ -71,7 +71,7 @@
   @keyframes ldot { 0%,100%{opacity:.2;transform:scale(.7)} 50%{opacity:1;transform:scale(1)} }
   .clock-colon { display:inline; }
 
-  /* ── ERROR ── */
+  /* ‚îÄ‚îÄ ERROR ‚îÄ‚îÄ */
   #error {
     position: fixed; inset: 0;
     display: none; align-items: center; justify-content: center;
@@ -82,7 +82,7 @@
   #error h2 { font-size: clamp(1.4rem,2vw,2rem); font-weight: 700; color: var(--gold); }
   #error p  { color: var(--text2); font-size: clamp(0.8rem,1vw,1rem); }
 
-  /* ── APP SHELL ── */
+  /* ‚îÄ‚îÄ APP SHELL ‚îÄ‚îÄ */
   body { overflow: hidden; }
 
   #app {
@@ -146,7 +146,7 @@
     color: var(--gold);
   }
 
-  /* ── SIDEBAR (hidden on desktop) ── */
+  /* ‚îÄ‚îÄ SIDEBAR (hidden on desktop) ‚îÄ‚îÄ */
   .sidebar {
     grid-row: 1 / 3;
     display: flex;
@@ -262,7 +262,7 @@
     min-height: 0;
   }
 
-  /* ── EVENTS PANEL ── */
+  /* ‚îÄ‚îÄ EVENTS PANEL ‚îÄ‚îÄ */
   #events-panel {
     display: flex;
     flex-direction: column;
@@ -323,6 +323,10 @@
     display: inline-block;
     padding-right: 60px;
     flex-shrink: 0;
+  }
+  .ev-ticker strong {
+    color: var(--gold);
+    font-weight: 800;
   }
   @keyframes ticker {
     0%   { transform: translateX(0); }
@@ -616,7 +620,7 @@
     padding-left: 0;
   }
 
-  /* ── FOOTER ── */
+  /* ‚îÄ‚îÄ FOOTER ‚îÄ‚îÄ */
   .footer-row {
     width: 100%;
     max-width: none;
@@ -663,7 +667,7 @@
     letter-spacing: 0.07em;
   }
 
-  /* ── BLACKOUT ── */
+  /* ‚îÄ‚îÄ BLACKOUT ‚îÄ‚îÄ */
   #blackout {
     display: none;
     position: fixed; inset: 0; z-index: 200;
@@ -695,7 +699,7 @@
 
   .bg-deco { display: none; }
 
-  /* ── NEXT SALAH BANNER (desktop) ── */
+  /* ‚îÄ‚îÄ NEXT SALAH BANNER (desktop) ‚îÄ‚îÄ */
   #mobile-banner {
     display: flex !important;
     width: 100%;
@@ -746,7 +750,7 @@
   }
   #mobile-iq-bar { display: none !important; }
 
-  /* ── MOBILE ── */
+  /* ‚îÄ‚îÄ MOBILE ‚îÄ‚îÄ */
   /* iPad optimisations */
   @media (min-width: 768px) and (max-width: 1180px) {
     #app { padding: clamp(6px, 1vw, 12px); }
@@ -1093,13 +1097,13 @@
   <aside class="sidebar">
     <div class="sidebar-body">
       <div class="s-clock-wrap">
-        <div id="clock">—:——</div>
-        <div id="date-gregorian">—</div>
+        <div id="clock">‚Äî:‚Äî‚Äî</div>
+        <div id="date-gregorian">‚Äî</div>
         <div id="date-hijri"></div>
       </div>
       <div class="s-divider"></div>
       <div class="s-mosque">
-        <div class="mosque-name" id="mosque-name">—</div>
+        <div class="mosque-name" id="mosque-name">‚Äî</div>
         <div class="mosque-address" id="mosque-address"></div>
         <div class="silence-wrap" style="margin-top: clamp(8px,1vw,18px); padding-top:0;">
           <svg class="silence-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -1117,9 +1121,9 @@
   <div id="mobile-info" style="display:none">
     <div id="mi-logo-wrap" style="display:none;align-items:center;margin-right:10px;flex-shrink:0"><img id="mi-logo" class="mi-logo" src="" alt=""></div>
     <div class="mi-mosque">
-      <div class="mi-name" id="mi-name">—</div>
-      <div class="mi-address" id="mi-address">—</div>
-      <div class="mi-hijri" id="mi-hijri">—</div>
+      <div class="mi-name" id="mi-name">‚Äî</div>
+      <div class="mi-address" id="mi-address">‚Äî</div>
+      <div class="mi-hijri" id="mi-hijri">‚Äî</div>
     </div>
     <div class="mi-divider"></div>
     <div class="mi-clock"><span id="mi-time">12:00</span> <span class="mi-ampm" id="mi-ampm">AM</span></div>
@@ -1139,7 +1143,8 @@
     <div class="ev-footer">
       <div class="ev-ticker-wrap">
         <div class="ev-ticker">
-          <span>Pre-recorded online courses available — visit <strong>online.daralarqam.co.uk</strong>&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;Support our mission — donate at <strong>daralarqam.co.uk/donate</strong>&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;</span><span>Pre-recorded online courses available — visit <strong>online.daralarqam.co.uk</strong>&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;Support our mission — donate at <strong>daralarqam.co.uk/donate</strong>&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;</span>
+          <span>Eid Jama'ah&nbsp;&nbsp;&nbsp;¬∑&nbsp;&nbsp;&nbsp;1st Jama'ah: <strong>8am</strong>&nbsp;&nbsp;&nbsp;¬∑&nbsp;&nbsp;&nbsp;2nd Jama'ah: <strong>9am</strong>&nbsp;&nbsp;&nbsp;¬∑&nbsp;&nbsp;&nbsp;</span>
+          <span>Eid Jama'ah&nbsp;&nbsp;&nbsp;¬∑&nbsp;&nbsp;&nbsp;1st Jama'ah: <strong>8am</strong>&nbsp;&nbsp;&nbsp;¬∑&nbsp;&nbsp;&nbsp;2nd Jama'ah: <strong>9am</strong>&nbsp;&nbsp;&nbsp;¬∑&nbsp;&nbsp;&nbsp;</span>
         </div>
       </div>
     </div>
@@ -1162,24 +1167,24 @@
   <footer class="footer-row">
     <div class="f-cell">
       <div class="f-label">Sunrise</div>
-      <div class="f-value" id="sunrise">—</div>
+      <div class="f-value" id="sunrise">‚Äî</div>
     </div>
     <div class="f-spacer"></div>
     <div class="f-cell">
       <div class="f-label" id="jummah-label">Jumu'ah</div>
-      <div class="f-value" id="jummah-wrap">—</div>
+      <div class="f-value" id="jummah-wrap">‚Äî</div>
     </div>
   </footer>
   </div>
 
   <section id="content-window" aria-hidden="true">
     <div class="cw-kicker" id="cw-kicker">Hadith of the Day</div>
-    <div class="cw-title" id="cw-title">The best among you are those who learn the Qur’an and teach it.</div>
+    <div class="cw-title" id="cw-title">The best among you are those who learn the Qur‚Äôan and teach it.</div>
     <div class="cw-desc" id="cw-desc">A reminder to keep our homes connected to recitation, learning and practice.</div>
     <div class="cw-source" id="cw-source">Sahih al-Bukhari</div>
     <div class="cw-meta">
       <span class="cw-pill" id="cw-pill-1">Daily reminder</span>
-      <span class="cw-pill" id="cw-pill-2">Qur’an</span>
+      <span class="cw-pill" id="cw-pill-2">Qur‚Äôan</span>
     </div>
   </section>
 
@@ -1187,7 +1192,7 @@
   <div id="mobile-banner">
     <div class="mb-left">
       <div class="mb-label">Next Salah</div>
-      <div class="mb-prayer" id="mb-prayer">—</div>
+      <div class="mb-prayer" id="mb-prayer">‚Äî</div>
     </div>
     <div class="mb-center">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.6;flex-shrink:0">
@@ -1228,14 +1233,14 @@
 </div>
 
 <script>
-// ── CONFIG ──────────────────────────────────────────────────────────────────
+// ‚îÄ‚îÄ CONFIG ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ
 const SHEET_ID = '1ShUEYYtEFOEnqWf8Go9mK8aSJsTp4G8aQ0oAZTAl8uc';
 
 const PNAMES  = ['fajr','zuhr','asr','maghrib','isha'];
 const PLABELS = { fajr:'Fajr', zuhr:'Zuhr', asr:'Asr', maghrib:'Maghrib', isha:'Isha' };
-const ARABIC  = { fajr:'الفجر', zuhr:'الظهر', asr:'العصر', maghrib:'المغرب', isha:'العشاء' };
+const ARABIC  = { fajr:'ÿßŸÑŸÅÿ¨ÿ±', zuhr:'ÿßŸÑÿ∏Ÿáÿ±', asr:'ÿßŸÑÿπÿµÿ±', maghrib:'ÿßŸÑŸÖÿ∫ÿ±ÿ®', isha:'ÿßŸÑÿπÿ¥ÿßÿ°' };
 
-// ── GOOGLE SHEETS FETCH ───────────────────────────────────────────────────────
+// ‚îÄ‚îÄ GOOGLE SHEETS FETCH ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ
 const _sheetCache = {};
 async function fetchSheet(tabName) {
   const cacheKey = tabName;
@@ -1464,10 +1469,10 @@ function scheduleFridayReminderBoundaryRefresh(tod) {
 
 
 
-// ── HELPERS ──────────────────────────────────────────────────────────────────
+// ‚îÄ‚îÄ HELPERS ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ
 
 function fmt(s) {
-  if (!s) return '—';
+  if (!s) return '‚Äî';
   s = String(s).trim();
   // Already has AM/PM
   if (/[AP]M/i.test(s)) return s.replace(/\s*([AP]M)/i, '\u2009$1');
@@ -1531,7 +1536,7 @@ function hijriDate(d) {
   } catch { return ''; }
 }
 
-// ── RENDER ROWS ───────────────────────────────────────────────────────────────
+// ‚îÄ‚îÄ RENDER ROWS ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ
 function renderRows(tod, tom) {
   const cont = document.getElementById('rows');
   cont.innerHTML = '';
@@ -1558,7 +1563,7 @@ function renderRows(tod, tom) {
     row.dataset.begins = begins;
     row.dataset.jamaah = jamaah || '';
     const prayerLabel = isFriday && p === 'zuhr' ? "Jumu'ah" : PLABELS[p];
-    const prayerArabic = isFriday && p === 'zuhr' ? 'الجمعة' : ARABIC[p];
+    const prayerArabic = isFriday && p === 'zuhr' ? 'ÿßŸÑÿ¨ŸÖÿπÿ©' : ARABIC[p];
     row.innerHTML = `
       <div class="p-name-wrap">
         <div class="p-name">${prayerLabel}</div>
@@ -1568,13 +1573,13 @@ function renderRows(tod, tom) {
       <div class="p-cell p-jamaah-wrap">
         <div class="p-jamaah">${fmt(jamaah)}</div>
       </div>
-      <div class="p-cell p-tomorrow">${tmr ? fmt(tmr) : '—'}</div>
+      <div class="p-cell p-tomorrow">${tmr ? fmt(tmr) : '‚Äî'}</div>
     `;
     cont.appendChild(row);
   });
 }
 
-// ── CLOCK ─────────────────────────────────────────────────────────────────────
+// ‚îÄ‚îÄ CLOCK ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ
 function startClock() {
   const clockEl = document.getElementById('clock');
   const gregEl  = document.getElementById('date-gregorian');
@@ -1607,7 +1612,7 @@ function startClock() {
   setInterval(tick, 1000);
 }
 
-// ── ACTIVE ROW + IQAMAH BARS ──────────────────────────────────────────────────
+// ‚îÄ‚îÄ ACTIVE ROW + IQAMAH BARS ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ
 function startActiveTracking(tod, tom, mosque) {
   function nextJummahSecondsAfter(nowS) {
     const times = (mosque.jummahRows || [])
@@ -1764,7 +1769,7 @@ function startActiveTracking(tod, tom, mosque) {
   checkBlackout();
   setInterval(checkBlackout, 1000);
 
-  // Auto-refresh classes & events every 5 minutes — only re-renders if data changed
+  // Auto-refresh classes & events every 5 minutes ‚Äî only re-renders if data changed
   let _lastClassHash = window._lastClassHash || '';
   setInterval(async () => {
     try {
@@ -1877,7 +1882,7 @@ async function startContentWindowRotation(tod) {
   }, 30000);
 }
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
+// ‚îÄ‚îÄ INIT ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ
 async function init() {
   const loadEl = document.getElementById('loading');
   const appEl  = document.getElementById('app');
@@ -1902,7 +1907,7 @@ async function init() {
       logoImg.alt = mosque.name || '';
       logoWrap.style.display = 'flex';
     }
-    document.title = `${mosque.name} — Prayer Times`;
+    document.title = `${mosque.name} ‚Äî Prayer Times`;
 
     // Sunrise from sheet row (sunrise_start column), fallback to API
     const sunriseEl = document.getElementById('sunrise');
@@ -1954,7 +1959,7 @@ async function init() {
     const tod = mapRow(todRow, blackoutSettings);
     const tom = tomRow ? mapRow(tomRow, blackoutSettings) : null;
 
-    // Fetch JummahTimes tab — build mosque object with all jummah times
+    // Fetch JummahTimes tab ‚Äî build mosque object with all jummah times
     let jummahTimes = [];
     try {
       const jRows = await fetchSheet('JummahTimes');
@@ -1985,12 +1990,12 @@ async function init() {
 
 init();
 
-// ── JUMMAH ANIMATOR ────────────────────────────────────────────────────────────
+// ‚îÄ‚îÄ JUMMAH ANIMATOR ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ
 function initJummahAnimator(mosque) {
   const wrap = document.getElementById('jummah-wrap');
   if (!wrap) return;
   const times = (mosque.jummahRows || []).filter(r => r.time);
-  if (!times.length) { wrap.textContent = '—'; return; }
+  if (!times.length) { wrap.textContent = '‚Äî'; return; }
   if (times.length === 1) {
     const labelEl = document.getElementById('jummah-label');
     if (labelEl) labelEl.textContent = times[0].label || "Jumu'ah";
@@ -2007,7 +2012,7 @@ function initJummahAnimator(mosque) {
   setInterval(() => { idx = (idx + 1) % times.length; show(); }, 10000);
 }
 
-// ── EVENTS PAGINATION ─────────────────────────────────────────────────────────
+// ‚îÄ‚îÄ EVENTS PAGINATION ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ‚îÄ
 async function initEvents(existingRows = null, tod = null, tom = null) {
   const list   = document.getElementById('ev-list');
   const dotsEl = document.getElementById('ev-dots');
@@ -2055,7 +2060,7 @@ async function initEvents(existingRows = null, tod = null, tom = null) {
 
   // Filter out courses that have ended (start_date + weeks * 7 days)
   EVENTS = EVENTS.filter(ev => {
-    if (!ev.start_date || !ev.weeks) return true; // ongoing — always show
+    if (!ev.start_date || !ev.weeks) return true; // ongoing ‚Äî always show
     const start = parseDate(ev.start_date);
     if (!start) return true;
     const endDate = new Date(start.getTime() + ev.weeks * 7 * 86400000);
@@ -2102,7 +2107,7 @@ async function initEvents(existingRows = null, tod = null, tom = null) {
     const startDate = parseDate(ev.start_date);
 
     if (startDate && startDate > today) {
-      // Course hasn't started — show "Saturday 2nd May"
+      // Course hasn't started ‚Äî show "Saturday 2nd May"
       isNew = true;
       const diffDays = Math.round((startDate - today) / 86400000);
       if (diffDays === 0) {
@@ -2124,7 +2129,7 @@ async function initEvents(existingRows = null, tod = null, tom = null) {
       else if (score === 1) dayLabel = 'Tomorrow';
       else                  dayLabel = ev.day;
     }
-    return { ...ev, isNew, timeLabel: ev.time ? `${dayLabel} · ${fmtAmPm(normTimeTo24(ev.time, 0))}` : dayLabel };
+    return { ...ev, isNew, timeLabel: ev.time ? `${dayLabel} ¬∑ ${fmtAmPm(normTimeTo24(ev.time, 0))}` : dayLabel };
   });
 
   if (isFridayReminderWindow(tod)) {

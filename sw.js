@@ -1,4 +1,4 @@
-const CACHE = 'daralarqam-v1';
+const CACHE = 'daralarqam-v2';
 const ASSETS = [
   './index.html',
   './manifest.json',
